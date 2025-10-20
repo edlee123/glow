@@ -13,6 +13,8 @@ setup(
         "openai>=1.0.0",
         "jsonschema>=4.0.0",
         "python-dotenv>=0.19.0",
+        "opencv-python>=4.5.0",
+        "numpy>=1.20.0",
     ],
     entry_points={
         "console_scripts": [
@@ -21,7 +23,7 @@ setup(
     },
     python_requires=">=3.8",
     author="Adobe Glow Team",
-    author_email="example@adobe.com",
+    author_email="ed.lee.ai@proton.me",
     description="Creative Automation Pipeline for Social Ad Campaigns",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",

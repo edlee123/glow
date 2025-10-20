@@ -27,7 +27,7 @@ Glow up your social campaigns! Glow is a Python package designed to automate the
     - Metrics for asset generation.
     - Structured output organization for easy review and analysis
 
-## How It Works: The Creative Automation Pipeline
+## How It Works
 
 Glow implements a two-stage creative automation pipeline:
 
@@ -92,7 +92,7 @@ git clone https://github.com/edlee123/glow.git
 cd glow
 
 # Create a virtual environment
-python -m venv venv
+python3 -m venv venv
 source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install the package and dependencies
