@@ -2,27 +2,25 @@
 
 # Glow - Creative Campaign Automation
 
-Glow up your social campaigns! Glow is a Python package designed to automate the generation of creative assets for social ad campaigns. Included are example campaigns for global consumer goods companies that need to launch hundreds of localized social ad campaigns monthly.
+Glow up your social campaigns! Glow is a Python package designed to automate the generation of creative assets for social ad campaigns. Included are example campaigns for global consumer goods companies that need to launch hundreds of social ad campaigns monthly.
 
 ## Features
 
-- Uses LLM to generate multiple creative concepts compliant with campaign briefs, brand guidelines, legal checks (prohibited wording).
-- Accept input assets from local storage or URL and incorporate the style and composition into generated content
-- Generate new assets using AI models like Google Gemini 2.5 Flash Image via OpenRouter.ai (with future Adobe Firefly integration)
-- Produce creatives in multiple aspect ratios (1:1, 9:16, 16:9) for different social platforms.
-- Display concept messages on the final assets.
-- Save generated outputs and their configuration in an organized folder structure
-- Adapter architecture provides flexiblity in concept2asset pipelines to incorporate APIs from different providers e.g. text-to-image models, Firefly, or photo-editing like PhotoShop . 
+- Uses LLMs to generate multiple creative concepts compliant with campaign briefs, brand guidelines, and legal requirements like prohibited wording
+- Generates new assets using AI models like Google Gemini 2.5 Flash Image from OpenRouter.ai, with flexible pipeline architecture to add other APIs like Adobe Firefly or Adobe Photoshop APIs for post-processing.
+- Accepts input assets from local storage or URL using AI to incorporate the style and composition into new AI generated assets.
+- Produces creatives in multiple aspect ratios (1:1, 9:16, 16:9) for different social platforms.
+- Displays concept messages on the final assets.
+- Saves generated outputs and their configuration in an organized folder structure
 
-### PLUS Nice to Have Features (from requirements)
+### PLUS Nice to Have Features
 
 - ✅ **Brand compliance**:
-  - Campaign briefs include brand guidelines with color palette, typography, and prohibited content. The `campaign2concept` command will have an LLM generate concepts to adhere to campaign brand guidelines.
+  - Campaign briefs include brand guidelines with color palette, typography, and prohibited content. The `glow campaign2concept` command will have an LLM generate concepts to adhere to campaign brand guidelines.
   - ✅ Logo detection: OpenCV-based logo detection to verify logo presence in generated assets
     - Command-line tool: `glow reviewlogo` to check for logo presence.
   - ✅ **Legal content checks**:
-    - Campaign briefs include "do_not_use" section to specify prohibited words and imagery from the outset from `campaign2concept`
-    - And as an added guard the new `reviewlanguage` command checks concept files for prohibited words and phrases post concept generation.
+    - A new additional guard with `glow reviewlanguage` to check concept files for prohibited words and phrases post concept generation.
   - ✅ **Logging and reporting of results**:
     - Comprehensive logging system captures all steps of the generation process
     - Each concept includes detailed logs stored in .log files
@@ -35,7 +33,7 @@ Glow implements a two-stage creative automation pipeline:
 
 ### Stage 1: Campaign to Concept (campaign2concept)
 
-The `campaign2concept` process transforms a campaign brief into multiple creative concepts:
+The `glow campaign2concept` automates the creation of multiple creative concepts from a campaign brief:
 
 1. **Input**: A JSON campaign brief containing:
    - Campaign details (name, objectives, messaging)
@@ -56,28 +54,26 @@ The `campaign2concept` process transforms a campaign brief into multiple creativ
    - API parameters for image generation services
    - Text overlay specifications and styling rules
    - Image processing instructions
-   - Output organization directives
+   - Output organization
    - Future: localization settings and language configurations to localize concept pipelines.
    
 ### Stage 2: Concept to Asset (concept2asset)
 
-The `concept2asset` process transforms a concept pipeline json file into final creative assets:
+The `glow concept2asset` process takes a concept pipeline json file and processes it into final creative assets:
 
-1. **Input**: A concept configuration JSON file
+1. **Input**: A concept pipeline JSON file
 
 2. **Processing**:
-   - Image generation by default uses Google Gemini 2.5 Flash Image (Nano Banana) via OpenRouter.ai
-   - Text processing and styling, reference assets if provided.
-   - Image editing (applying text overlays, adjustments)
-   - Output organization and metadata creation in desired formats.
+   - Image generation by default uses Google Gemini 2.5 Flash Image (Nano Banana) via OpenRouter.ai.
+   - Text processing and styling, reference assets if provided currently with Pillow. Other image processors or APIs can be added.
+   - Output organization in desired formats.
 
 3. **Output**: Final creative assets in the specified format:
    - Base image (raw generated image)
    - Image with text overlay
    - Image with logo overlay
    - Adjusted image (with color/contrast adjustments)
-   - Localized versions (if applicable)
-   - Logs and metadata
+   - Logs and metadata in metrics.log and glow.log
 
 ## Installation
 
@@ -101,15 +97,19 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install the package and dependencies
 pip install -e .
+```
 
 #### 2. Get an OpenRouter API Key
 
 To use Glow with Google Gemini 2.5 Flash Image, you'll need an OpenRouter API key:
 
-1. Visit [OpenRouter.ai](https://openrouter.ai/) and create an account
-2. After logging in, navigate to the API Keys section
-3. Create a new API key with appropriate rate limits for your usage, and set up credit card.
-4. Copy your API key for use in the next step
+   i. Visit [OpenRouter.ai](https://openrouter.ai/) and create an account
+
+   ii. After logging in, navigate to the API Keys section
+
+   iii. Create a new API key and set up credit card (can specify rate limits etc.)
+
+   iv. Copy your API key for use in the next step
 
 OpenRouter provides access to various AI models including Google Gemini 2.5 Flash Image which is used by Glow for image generation.
 
@@ -136,20 +136,19 @@ Glow includes two example campaigns to help you get started:
 
 The starter campaign provides a basic introduction to:
 - Campaign brief schema and structure
-- Using the `campaign2concept` command to use AI to generate creative concept files for multiple products and aspect ratios. This step generates concept pipeline files that define the entire asset generation for each concept.
-- Using the `concept2asset` to process concept pipeline files to generate  visual assets.
-- Using the `reviewlanguage` and `reviewlogo` commands for compliance checks.
+- Using the `glow campaign2concept` to use AI to generate creative concept files for multiple products and aspect ratios. This step generates concept pipeline files that define the entire asset generation for each concept.
+- Using `glow concept2asset` to process concept pipeline files to generate the assets.
+- Using the `glow reviewlanguage` and `glow reviewlogo` commands for post generation checks.
 
-This is the perfect starting point for new users to understand Glow's workflow.
+This is the perfect starting point for new users to start Glow-ing and scaling up their social media workflows!
 
 ### 2. [D-Pop Campaign](examples/dpop_campaign/campaign_brief_example.json)
 
-The D-Pop campaign demonstrates more advanced features:
-- Using product-specific reference images to guide AI-generated assets.
-- Creating concepts for diverse target audiences (teens and parents).
-- Incorporating visual brand assets and guidelines into the generation process with style and composition strength.
+The D-Pop campaign demonstrates advanced features:
+- Using product-specific brand reference images to guide AI-generated assets with style and composition strength.
+- Creating concepts for diverse target audiences (teens and parents) that may have sub-brands.
 
-This example shows how Glow can handle complex, multi-product campaigns with more specific visual requirements.
+This example shows how Glow can handle complex, multi-product campaigns with more varied visual requirements.
 
 ## Usage
 
@@ -160,21 +159,22 @@ Glow provides the following commands:
 #### 1. Generate concept configurations from a campaign brief
 
 ```bash
-glow campaign2concept ./campaigns/summer2025/brief.json ./campaigns/summer2025/output
+glow campaign2concept ./examples/starter_campaign/campaign_brief_test.json -f campaign
 ```
 
 Options:
 - `-n`: Number of concepts to generate (default: 3)
-- `-format`: Output format (default: 1_1, options: 1_1, 9_16, 16_9)
+- `--format`: Output format (default: 1_1, options: 1_1, 9_16, 16_9, campaign). The `campaign` option will generate concepts for all formats specified in the campaign brief file.
 
-The above create entire concept pipeline files to generate assets. They can
-be reviewed, edited, and retained for generating assets.
+This command will create concept files that define the entire asset generation process. These files can be reviewed, edited, and retained for generating assets.
 
 #### 2. Generate assets from a concept configuration
 
 ```bash
-glow concept2asset ./campaigns/summer2025/output/tropical_breeze/1_1/concept1/concept_config.json
+glow concept2asset ./examples/starter_campaign/energy_drink_x/concept1_1_1.json
 ```
+
+This use text-to-image generation and post-image processing to generate asset.
 
 #### 3. Check concept files for language compliance issues
 
@@ -190,65 +190,33 @@ This command checks concept files for prohibited words or phrases that may viola
 
 ```bash
 # Check a single file
-glow reviewlanguage examples/dpop_campaign/d-pop_golf_collection/concept1_1_1.json
-
-# Check multiple files using a glob pattern
-glow reviewlanguage "examples/dpop_campaign/*/concept*.json"
+glow reviewlanguage examples/starter_campaign/energy_drink_x/concept1_1_1.json
 
 # Check files recursively using the ** pattern
-glow reviewlanguage "examples/seasonal_campaign/**/*.json"
-
-# Save the report to a file
-glow reviewlanguage "examples/dpop_campaign/*/concept*.json" --output report.txt
-
-# Use a custom list of prohibited words
-glow reviewlanguage "examples/dpop_campaign/*/concept*.json" --custom-words prohibited_words.txt
-
-# Pipe output to a file
 glow reviewlanguage "examples/starter_campaign/**/*.json" > language_report.txt
 ```
 
 #### 4. Check logo presence in images
 
 ```bash
-glow reviewlogo <asset_path> [--logo-path <logo_path> | --logo-url <logo_url> | --campaign-file <campaign_file>] [options]
-```
-
-Options:
-- `--logo-path`: Path to a local logo image file
-- `--logo-url`: URL to a remote logo image
-- `--campaign-file`: Path to a campaign brief JSON file containing logo information
-- `--threshold`: Matching threshold (0.0 to 1.0, higher is more strict, default: 0.7)
-- `--output`, `-o`: Output file to save the report to
-- `--save-marked`: Directory to save images with marked logo locations
-
-This command checks if a logo is present in image assets and provides a confidence score (0-100):
-
-```bash
-# Using a campaign brief file that contains logo information
 glow reviewlogo "examples/starter_campaign/**/*.png" --campaign-file examples/starter_campaign/campaign_brief_test.json
-
-# Using a local logo file
-glow reviewlogo "examples/starter_campaign/**/*.png" --logo-path examples/starter_campaign/logo.png
-
-# Using a logo URL
-glow reviewlogo "examples/starter_campaign/**/*.png" --logo-url https://example.com/logo.png
-
-# Adjusting the matching threshold
-glow reviewlogo "examples/dpop_campaign/**/*.png" --logo-path examples/dpop_campaign/demon_pop_bottle.png --threshold 0.7
-
-# Saving the report to a file
-glow reviewlogo "examples/dpop_campaign/**/*.png" --logo-path examples/dpop_campaign/demon_pop_bottle.png --output logo_report.txt
-
-# Saving marked images showing logo locations
-glow reviewlogo "examples/dpop_campaign/**/*.png" --logo-path examples/dpop_campaign/demon_pop_bottle.png --save-marked ./marked_images
 ```
+
+This command checks if a logo is present in image assets recursing through sub directories and outputs a report. The command uses the logo information from the campaign brief file. Under the hood, it uses OpenCV with a FLANN-based matcher for feature detection and matching, providing robust logo recognition even with scaling, rotation, and partial occlusion. Learn more about the technique [here](https://docs.opencv.org/4.x/dc/dc3/tutorial_py_matcher.html#:~:text=In%20this%20chapter%201.%20W).
 
 
 ### Running Tests
 
 ```bash
+# Run all tests
 pytest
+
+# Run specific test modules
+pytest tests/concept2asset/
+pytest tests/campaign2concept/test_input_validator.py
+
+# Run with verbose output
+pytest -v
 ```
 
 ## License
