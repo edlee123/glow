@@ -1,0 +1,66 @@
+{
+  "campaign_id": "test_campaign_2025",
+  "products": [
+    {
+      "name": "Energy Drink X",
+      "description": "A refreshing energy drink with natural ingredients",
+      "target_emotions": ["energized", "focused", "motivated"],
+      "target_audience": {
+        "age_range": "18-35",
+        "interests": ["fitness", "sports", "productivity"],
+        "pain_points": ["fatigue", "lack of focus", "low energy"]
+      }
+    },
+    {
+      "name": "Relaxation Tea",
+      "description": "A calming herbal tea for stress relief",
+      "target_emotions": ["relaxed", "peaceful", "balanced"],
+      "target_audience": {
+        "age_range": "25-55",
+        "interests": ["wellness", "meditation", "reading"],
+        "pain_points": ["stress", "anxiety", "sleep issues"]
+      }
+    }
+  ],
+  "target_market": {
+    "region": "North America",
+    "countries": ["USA", "Canada"],
+    "primary_language": "English",
+    "secondary_languages": ["Spanish", "French"]
+  },
+  "target_audience": {
+    "age_range": "25-45",
+    "gender": "All",
+    "interests": ["fitness", "wellness", "productivity"],
+    "pain_points": ["stress", "fatigue", "lack of focus"]
+  },
+  "campaign_message": {
+    "primary": "Balance Your Day, Your Way",
+    "secondary": "Energy when you need it, calm when you don't",
+    "call_to_action": "Find your balance today"
+  },
+  "visual_direction": {
+    "style": "Clean, modern photography with vibrant colors",
+    "color_palette": ["#FF5733", "#33FF57", "#3357FF", "#FFFFFF"],
+    "mood": "Balanced, energetic yet calm"
+  },
+  "brand_guidelines": {
+    "logo_placement": "Bottom right corner, at least 50px from edges",
+    "typography": {
+      "primary_font": "Montserrat",
+      "secondary_font": "Open Sans"
+    },
+    "do_not_use": [
+      "Competing beverage brands",
+      "Imagery that suggests unhealthy lifestyle",
+      "Dark or moody tones"
+    ]
+  },
+  "output_requirements": {
+    "formats": ["1_1", "9_16", "16_9"],
+    "num_concepts": 2
+  },
+  "campaign_assets": {
+    "logo": "https://cdn.pixabay.com/photo/2016/12/18/13/45/download-1915753_960_720.png"
+  }
+}

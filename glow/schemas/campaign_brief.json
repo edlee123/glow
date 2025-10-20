@@ -1,0 +1,432 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Campaign Brief",
+  "description": "Schema for campaign briefs in the Glow creative automation pipeline",
+  "type": "object",
+  "required": [
+    "campaign_id",
+    "products",
+    "target_market",
+    "target_audience",
+    "campaign_message"
+  ],
+  "properties": {
+    "campaign_id": {
+      "type": "string",
+      "description": "Unique identifier for the campaign",
+      "pattern": "^[a-zA-Z0-9_-]+$"
+    },
+    "products": {
+      "type": "array",
+      "description": "List of products featured in the campaign",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "description"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Product name"
+          },
+          "description": {
+            "type": "string",
+            "description": "Product description"
+          },
+          "target_emotions": {
+            "type": "array",
+            "description": "Emotions the product should evoke",
+            "items": {
+              "type": "string"
+            }
+          },
+          "target_audience": {
+            "type": "object",
+            "description": "Product-specific target audience information (optional)",
+            "properties": {
+              "age_range": {
+                "type": "string",
+                "description": "Age range of the target audience (e.g., '18-34')"
+              },
+              "gender": {
+                "type": "string",
+                "description": "Target gender (optional)"
+              },
+              "interests": {
+                "type": "array",
+                "description": "Interests of the target audience",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "pain_points": {
+                "type": "array",
+                "description": "Pain points the product addresses",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "demographics": {
+                "type": "object",
+                "description": "Additional demographic information (optional)"
+              }
+            }
+          },
+          "reference_image": {
+            "type": "string",
+            "description": "Path to reference image of the product (optional, deprecated)"
+          },
+          "reference_images": {
+            "type": "object",
+            "description": "Reference images for the product (optional)",
+            "properties": {
+              "product_images": {
+                "type": "array",
+                "description": "URLs to product reference images",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "brand_style": {
+                "type": "string",
+                "description": "URL to brand style reference image"
+              },
+              "style_strength": {
+                "type": "integer",
+                "description": "Strength of style influence (0-100)",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 70
+              },
+              "composition_strength": {
+                "type": "integer",
+                "description": "Strength of composition influence (0-100)",
+                "minimum": 0,
+                "maximum": 100,
+                "default": 50
+              }
+            }
+          },
+          "visual_direction": {
+            "type": "object",
+            "description": "Product-specific visual direction (optional)",
+            "properties": {
+              "style": {
+                "type": "string",
+                "description": "Visual style description for this product"
+              },
+              "mood": {
+                "type": "string",
+                "description": "Mood or emotional tone for this product"
+              },
+              "color_palette": {
+                "type": "array",
+                "description": "Color palette specific to this product",
+                "items": {
+                  "type": "string",
+                  "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "target_market": {
+      "type": "object",
+      "description": "Target market information",
+      "required": [
+        "region",
+        "primary_language"
+      ],
+      "properties": {
+        "region": {
+          "type": "string",
+          "description": "Geographic region for the campaign"
+        },
+        "countries": {
+          "type": "array",
+          "description": "List of target countries",
+          "items": {
+            "type": "string"
+          }
+        },
+        "primary_language": {
+          "type": "string",
+          "description": "Primary language for the campaign"
+        },
+        "secondary_languages": {
+          "type": "array",
+          "description": "Additional languages for localization",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "target_audience": {
+      "type": "object",
+      "description": "Target audience information",
+      "required": [
+        "age_range"
+      ],
+      "properties": {
+        "age_range": {
+          "type": "string",
+          "description": "Age range of the target audience (e.g., '18-34')"
+        },
+        "gender": {
+          "type": "string",
+          "description": "Target gender (optional)"
+        },
+        "interests": {
+          "type": "array",
+          "description": "Interests of the target audience",
+          "items": {
+            "type": "string"
+          }
+        },
+        "pain_points": {
+          "type": "array",
+          "description": "Pain points the product addresses",
+          "items": {
+            "type": "string"
+          }
+        },
+        "demographics": {
+          "type": "object",
+          "description": "Additional demographic information (optional)"
+        }
+      }
+    },
+    "campaign_message": {
+      "type": "object",
+      "description": "Campaign messaging",
+      "required": [
+        "primary"
+      ],
+      "properties": {
+        "primary": {
+          "type": "string",
+          "description": "Primary campaign message"
+        },
+        "secondary": {
+          "type": "string",
+          "description": "Secondary campaign message (optional)"
+        },
+        "call_to_action": {
+          "type": "string",
+          "description": "Call to action (optional)"
+        }
+      }
+    },
+    "visual_direction": {
+      "type": "object",
+      "description": "Visual direction for the campaign",
+      "required": [],
+      "properties": {
+        "style": {
+          "type": "string",
+          "description": "Visual style description"
+        },
+        "color_palette": {
+          "type": "array",
+          "description": "Color palette for the campaign",
+          "items": {
+            "type": "string",
+            "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+          }
+        },
+        "mood": {
+          "type": "string",
+          "description": "Mood or emotional tone of the visuals"
+        },
+        "reference_images": {
+          "type": "array",
+          "description": "Paths to reference images for visual style (optional)",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "seasonal_promotion": {
+      "type": "object",
+      "description": "Seasonal promotion information (optional)",
+      "properties": {
+        "season": {
+          "type": "string",
+          "description": "Season or holiday (e.g., 'Christmas', 'Halloween', 'Summer')"
+        },
+        "theme": {
+          "type": "string",
+          "description": "Theme for the seasonal promotion"
+        },
+        "start_date": {
+          "type": "string",
+          "format": "date",
+          "description": "Start date of the seasonal promotion"
+        },
+        "end_date": {
+          "type": "string",
+          "format": "date",
+          "description": "End date of the seasonal promotion"
+        },
+        "special_elements": {
+          "type": "array",
+          "description": "Special elements to include in the creative for this season",
+          "items": {
+            "type": "string"
+          }
+        },
+        "seasonal_colors": {
+          "type": "array",
+          "description": "Seasonal color palette that should be incorporated",
+          "items": {
+            "type": "string",
+            "pattern": "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$"
+          }
+        },
+        "seasonal_messaging": {
+          "type": "object",
+          "description": "Seasonal-specific messaging",
+          "properties": {
+            "tagline": {
+              "type": "string",
+              "description": "Seasonal tagline"
+            },
+            "greetings": {
+              "type": "string",
+              "description": "Seasonal greetings"
+            }
+          }
+        }
+      }
+    },
+    "brand_guidelines": {
+      "type": "object",
+      "description": "Brand guidelines (optional)",
+      "properties": {
+        "logo_placement": {
+          "type": "string",
+          "description": "Guidelines for logo placement"
+        },
+        "typography": {
+          "type": "object",
+          "description": "Typography guidelines",
+          "properties": {
+            "primary_font": {
+              "type": "string"
+            },
+            "secondary_font": {
+              "type": "string"
+            }
+          }
+        },
+        "do_not_use": {
+          "type": "array",
+          "description": "Elements to avoid in the creative",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "campaign_assets": {
+      "type": "object",
+      "description": "Existing campaign assets (optional)",
+      "properties": {
+        "logo": {
+          "type": "string",
+          "description": "Path or URL to logo file"
+        },
+        "logo_config": {
+          "type": "object",
+          "description": "Configuration for logo overlay",
+          "properties": {
+            "position": {
+              "type": "string",
+              "description": "Position of the logo on the image",
+              "enum": ["top_left", "top_right", "bottom_left", "bottom_right", "center"],
+              "default": "bottom_right"
+            },
+            "size": {
+              "type": "integer",
+              "description": "Size of the logo as a percentage of the image width (1-100)",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 15
+            },
+            "padding": {
+              "type": "integer",
+              "description": "Padding from the edge of the image in pixels",
+              "minimum": 0,
+              "default": 20
+            },
+            "opacity": {
+              "type": "integer",
+              "description": "Opacity of the logo (0-100)",
+              "minimum": 0,
+              "maximum": 100,
+              "default": 100
+            }
+          }
+        },
+        "product_images": {
+          "type": "array",
+          "description": "Paths to product images",
+          "items": {
+            "type": "string"
+          }
+        },
+        "background_images": {
+          "type": "array",
+          "description": "Paths to background images",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "output_requirements": {
+      "type": "object",
+      "description": "Output requirements (optional)",
+      "properties": {
+        "formats": {
+          "type": "array",
+          "description": "Required output formats",
+          "items": {
+            "type": "string",
+            "enum": ["1_1", "9_16", "16_9"]
+          },
+          "default": ["1_1", "9_16", "16_9"]
+        },
+        "num_concepts": {
+          "type": "integer",
+          "description": "Number of concepts to generate",
+          "minimum": 1,
+          "default": 3
+        }
+      }
+    },
+    "global_brand_style": {
+      "type": "object",
+      "description": "Global brand style reference (optional)",
+      "properties": {
+        "reference_image": {
+          "type": "string",
+          "description": "URL to global brand style reference image"
+        },
+        "style_strength": {
+          "type": "integer",
+          "description": "Strength of style influence (0-100)",
+          "minimum": 0,
+          "maximum": 100,
+          "default": 50
+        }
+      }
+    }
+  }
+}

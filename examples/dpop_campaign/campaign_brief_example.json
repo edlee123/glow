@@ -1,0 +1,96 @@
+{
+  "campaign_id": "dpop_fall_2025",
+  "products": [
+    {
+      "name": "Demon Pop",
+      "description": "A bold, energizing carbonated drink with dark berry flavors, designed for the daring and adventurous. Feature EXACTLY the SAME 5 male K-pop singers from the Saja Boys reference image, with a LARGE Demon Pop bottle PROMINENTLY featured in the foreground. Some singers should be drinking from Demon Pop bottles in a BRIGHT, vibrant setting.",
+      "target_emotions": ["energized", "rebellious", "confident"],
+      "target_audience": {
+        "age_range": "16-24",
+        "demographic": "Gen Z",
+        "interests": ["K-pop music", "supernatural themes", "boy bands"],
+        "pain_points": ["desire for identity", "need for energy", "seeking community"]
+      },
+      "reference_images": {
+        "product_images": [
+          "./examples/dpop_campaign/Saja_Boys_-_Soda_Pop.png",
+          "./examples/dpop_campaign/demon_pop_bottle.png"
+        ],
+        "style_strength": 95,
+        "composition_strength": 98
+      },
+      "visual_direction": {
+        "style": "bright, vibrant colors",
+        "mood": "Energetic, confident, stylish"
+      }
+    },
+    {
+      "name": "D-Pop Golf Collection",
+      "description": "Premium golf shirts with a beach theme and subtle demonic-inspired designs, perfect for dads who want to show support for their kids' music interests while maintaining a professional look. Create a PHOTO-REALISTIC image showing a DIVERSE group of parents and their teenage children on a lush, high-end golf course. The adults should be wearing the D-Pop beach-themed shirts in various colors. Include people of different ethnicities, ages, and genders enjoying a family golf outing together. Show a beautiful sunset or sunrise in the background.",
+      "target_emotions": ["proud", "connected", "stylish"],
+      "target_audience": {
+        "age_range": "35-55",
+        "demographic": "Diverse families",
+        "interests": ["golf", "fashion", "K-pop music", "family activities"],
+        "pain_points": ["connecting with kids' interests", "maintaining professional image", "finding unique style", "creating family memories"]
+      },
+      "reference_images": {
+        "product_images": [
+          "./examples/dpop_campaign/beach_shirt.png"
+        ],
+        "style_strength": 95,
+        "composition_strength": 98
+      },
+      "visual_direction": {
+        "style": "Photo-realistic professional golf aesthetic",
+        "mood": "Warm, inclusive, stylish",
+        "color_palette": ["#006400", "#87CEEB", "#FFFFFF", "#FF6600"]
+      }
+    }
+  ],
+  "target_market": {
+    "region": "Global",
+    "countries": ["South Korea", "United States", "Japan", "Thailand", "Brazil"],
+    "primary_language": "English",
+    "secondary_languages": ["Korean", "Japanese", "Thai", "Portuguese"]
+  },
+  "target_audience": {
+    "age_range": "16-55",
+    "interests": ["K-pop music", "supernatural themes", "gaming", "social media", "golf", "fashion", "family activities"],
+    "pain_points": ["desire for identity", "need for energy", "seeking community", "connecting with kids' interests", "creating family memories"]
+  },
+  "campaign_message": {
+    "primary": "Stay Cool with Demon Pop",
+    "secondary": "Embrace the energy of D-Pop",
+    "call_to_action": "Join the D-Pop Revolution"
+  },
+  "visual_direction": {
+  },
+  "seasonal_promotion": {
+    "season": "Fall",
+    "theme": "You're My Soda Pop"
+  },
+  "brand_guidelines": {
+    "logo_placement": "Top right corner, at least 20px from edges",
+    "logo_size": 15,
+    "logo_opacity": 90,
+    "typography": {
+      "primary_font": "Gotham",
+      "secondary_font": "Crimson Text"
+    },
+    "do_not_use": [
+      "Explicit demonic imagery",
+      "Religious symbols",
+      "Overly cute or childish elements",
+      "Competing K-pop group references",
+      "Halloween or spooky elements that overwhelm the K-pop aesthetic"
+    ]
+  },
+  "campaign_assets": {
+    "logo": "https://cdn.pixabay.com/photo/2016/12/18/13/45/download-1915753_960_720.png"
+  },
+  "output_requirements": {
+    "formats": ["1_1"],
+    "num_concepts": 1
+  }
+}

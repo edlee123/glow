@@ -1,0 +1,52 @@
+{
+  "generation_id": "test-soda-1-1-concept1-20251018",
+  "timestamp": "2025-10-18T01:30:00Z",
+  "input_brief": "summer2025_test",
+  "product": "Test Soda",
+  "aspect_ratio": "1:1",
+  "concept": "concept1",
+  "llm_processing": {
+    "model": "gpt-4",
+    "creative_direction": "Modern workspace with Test Soda as productivity fuel",
+    "image_prompt": "Create a promotional image for Test Soda with the following specifications:\n\n- Style: Modern, tech-inspired imagery with clean lines\n- Mood: Energetic, focused, productive\n- Color Palette: #0078D7, #50E6FF, #2D2D30, #FFFFFF\n- Target Audience: 18-34 year olds interested in active lifestyle, technology, social media\n- Aspect Ratio: 1:1\n\nThe image should:\n- Feature Test Soda as the focal point\n- Evoke emotions of refreshed, energized, happy\n- Address pain points like stress, fatigue, boredom\n- Have space for text overlay at the bottom\n- Be photorealistic and high quality\n- Not include any text in the image itself\n\nThis is concept 1 for the campaign.",
+    "text_overlay_config": {
+      "primary_text": "Refresh your code with Test Soda",
+      "text_position": "bottom",
+      "font": "Montserrat Bold",
+      "color": "#FFFFFF",
+      "shadow": true,
+      "shadow_color": "#00000080"
+    }
+  },
+  "image_generation": {
+    "provider": "openrouter_dalle",
+    "api_endpoint": "https://openrouter.ai/api/v1/images/generations",
+    "env_vars": ["OPENROUTER_API_KEY"],
+    "model": "openai/dall-e-3",
+    "parameters": {
+      "negative_prompt": "blurry, distorted, low quality, unrealistic, text, watermark",
+      "seed": 123456,
+      "style_strength": 80,
+      "reference_image": null
+    }
+  },
+  "localization": {
+    "enabled": true,
+    "target_language": "Spanish",
+    "api_endpoint": "https://api.translation-service.com/translate",
+    "env_vars": ["TRANSLATION_API_KEY"],
+    "translated_text": {
+      "primary_text": "Refresca tu código con Test Soda",
+      "secondary_text": "La elección del desarrollador para refrescarse",
+      "call_to_action": "Depura tu sed"
+    }
+  },
+  "image_processing": {
+    "provider": "pillow",
+    "env_vars": [],
+    "adjustments": [
+      {"type": "brightness", "value": 5},
+      {"type": "contrast", "value": 10}
+    ]
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "api": {
+    "openai": {
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "max_tokens": 2000,
+      "endpoint": "https://api.openrouter.ai/api/v1"
+    }
+  },
+  "campaign": {
+    "num_concepts": 3
+  },
+  "generated_concept": {
+    "model": "anthropic/claude-haiku-4.5",
+    "temperature": 0.7,
+    "max_tokens": 2000,
+    "endpoint": "https://api.openrouter.ai/api/v1",
+    "env_vars": ["OPENROUTER_API_KEY"],
+    "text_overlay_defaults": {
+      "font": "Arial",
+      "color": "#FFFFFF",
+      "shadow": true,
+      "shadow_color": "#00000080",
+      "position": "bottom"
+    }
+  },
+  "firefly_generation": {
+    "api_endpoint": "https://firefly-api.adobe.io/v2/images/generate",
+    "env_vars": ["ADOBE_CLIENT_ID", "ADOBE_CLIENT_SECRET"],
+    "model": "firefly-text-to-image",
+    "parameters": {
+      "negative_prompt": "blurry, distorted, low quality, unrealistic, text, watermark",
+      "style_strength": 80
+    },
+    "resolution": {
+      "1_1": [1080, 1080],
+      "9_16": [1080, 1920],
+      "16_9": [1920, 1080]
+    },
+    "formats": ["1_1", "9_16", "16_9"],
+    "quality": 95
+  },
+  "localization": {
+    "enabled": false,
+    "api_endpoint": "https://translation.googleapis.com/language/translate/v2",
+    "env_vars": ["TRANSLATION_API_KEY"]
+  },
+  "image_processing": {
+    "provider": "pillow",
+    "env_vars": [],
+    "adjustments": [
+      {"type": "brightness", "default_value": 0},
+      {"type": "contrast", "default_value": 0}
+    ],
+    "future_providers": {
+      "photoshop_api": {
+        "note": "Adobe Photoshop API integration planned for future releases",
+        "api_endpoint": "https://image.adobe.io/pie/psdService/text",
+        "env_vars": ["ADOBE_CLIENT_ID", "ADOBE_CLIENT_SECRET"]
+      }
+    }
+  },
+  "output": {
+    "directory": "output",
+    "file_format": "png"
+  },
+  "logging": {
+    "level": "INFO",
+    "file": "glow.log",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  },
+  "compliance": {
+    "language": {
+      "custom_words_file": null,
+      "severity_levels": {
+        "high": ["cure", "guaranteed", "promise"],
+        "medium": ["best", "free", "unlimited"],
+        "low": ["forever", "perfect"]
+      }
+    },
+    "logo": {
+      "default_logo_url": "https://cdn.pixabay.com/photo/2016/12/18/13/45/download-1915753_960_720.png",
+      "detection_threshold": 0.7
+    }
+  }
+}

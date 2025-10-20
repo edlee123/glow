@@ -1,0 +1,12 @@
+Language Compliance Report
+=========================
+Date: 2025-10-19 17:45:39
+Files Checked: 1
+Issues Found: 4
+
+File: tests/test_data/test_concept.json
+---------------------------------------
+1. Prohibited word 'best' found in root.generated_concept.text2image_prompt: Create an image showing our best product
+2. Prohibited word 'guaranteed' found in root.generated_concept.text_overlay_config.primary_text: Guaranteed results with our product!
+3. Prohibited word 'cure' found in root.generated_concept.text_overlay_config.secondary_text: The perfect cure for your problems
+4. Prohibited word 'perfect' found in root.generated_concept.text_overlay_config.secondary_text: The perfect cure for your problems

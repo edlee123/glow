@@ -1,0 +1,44 @@
+{
+  "campaign_id": "summer2025_test",
+  "products": [
+    {
+      "name": "Test Soda",
+      "description": "A refreshing test soda for development purposes",
+      "target_emotions": ["refreshed", "energized", "happy"]
+    }
+  ],
+  "target_market": {
+    "region": "North America",
+    "countries": ["USA", "Canada"],
+    "primary_language": "English",
+    "secondary_languages": ["Spanish", "French"]
+  },
+  "target_audience": {
+    "age_range": "18-34",
+    "interests": ["active lifestyle", "technology", "social media"],
+    "pain_points": ["stress", "fatigue", "boredom"]
+  },
+  "campaign_message": {
+    "primary": "Refresh your code with Test Soda",
+    "secondary": "The developer's choice for refreshment",
+    "call_to_action": "Debug your thirst"
+  },
+  "visual_direction": {
+    "style": "Modern, tech-inspired imagery with clean lines",
+    "color_palette": ["#0078D7", "#50E6FF", "#2D2D30", "#FFFFFF"],
+    "mood": "Energetic, focused, productive"
+  },
+  "campaign_assets": {
+    "logo": "tests/mock_data/assets/test_logo.png",
+    "product_images": [
+      "tests/mock_data/assets/test_product.png"
+    ],
+    "background_images": [
+      "tests/mock_data/assets/test_background.jpg"
+    ]
+  },
+  "output_requirements": {
+    "formats": ["1_1", "9_16", "16_9"],
+    "num_concepts": 2
+  }
+}
