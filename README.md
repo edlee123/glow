@@ -1,8 +1,12 @@
 ![Glow Logo]()
 
-# Glow - Creative Campaign Automation
+# Glow - AI to Scale Your Social Media Campaigns
 
-Glow up your social campaigns! Glow is a Python package designed to automate the generation of creative assets for social ad campaigns. Included are example campaigns for global consumer goods companies that need to launch hundreds of social ad campaigns monthly.
+Glow up your social campaigns!  Creating high-quality, brand-compliant assets for every product, in every format, for every market is a massive undertaking. Marketing teams struggle with maintaining brand consistency across hundreds of products, concepts, assets, formats, and meanwhile adapt campaigns for different markets and languages. It's no small feet to meet tight deadlines with limited creative resources, while ensuring legal compliance in the fast moving world of social media.
+
+Glow is a Python package designed to use AI to automate the generation of creative concepts and assets for social ad campaigns to make things a snap. 
+
+Included are example campaigns for global consumer goods companies that need to launch hundreds of social ad campaigns monthly.
 
 ## Features
 
