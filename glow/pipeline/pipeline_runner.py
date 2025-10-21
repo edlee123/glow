@@ -131,7 +131,9 @@ class PipelineRunner:
         # Apply text overlay
         self.output_manager.start_timing("text_overlay")
         try:
-            text_config = concept_config["generated_concept"]["text_overlay_config"]
+            # Determine which key to use for concept data
+            concept_key = "generated_concept" if "generated_concept" in concept_config else "llm_processing"
+            text_config = concept_config[concept_key]["text_overlay_config"]
             image_with_text_path = self._apply_text_overlay(
                 asset_path,
                 text_config,
@@ -277,7 +279,7 @@ class PipelineRunner:
             ValidationError: If the concept configuration is invalid.
         """
         # Check for required top-level keys
-        required_keys = ["generation_id", "product", "aspect_ratio", "concept", "generated_concept"]
+        required_keys = ["generation_id", "product", "aspect_ratio", "concept"]
         missing_keys = []
         
         for key in required_keys:
@@ -290,18 +292,35 @@ class PipelineRunner:
                 missing_keys[0] if missing_keys else None
             )
         
-        # Check for required generated_concept keys
-        required_concept_keys = ["creative_direction", "text2image_prompt", "text_overlay_config"]
-        missing_concept_keys = []
+        # Check if either generated_concept or llm_processing is present
+        if "generated_concept" not in concept_config and "llm_processing" not in concept_config:
+            raise ValidationError(
+                "Missing required key in concept configuration: either generated_concept or llm_processing must be present",
+                "generated_concept"
+            )
         
+        # Determine which key to use for concept data
+        concept_key = "generated_concept" if "generated_concept" in concept_config else "llm_processing"
+        
+        # Check for required concept keys
+        required_concept_keys = ["creative_direction", "text_overlay_config"]
+        # Add either text2image_prompt or image_prompt to required keys
+        if "text2image_prompt" not in concept_config[concept_key] and "image_prompt" not in concept_config[concept_key]:
+            required_concept_keys.append("text2image_prompt")  # Add this to show in error message
+        
+        missing_concept_keys = []
         for key in required_concept_keys:
-            if key not in concept_config["generated_concept"]:
+            # Special handling for text2image_prompt/image_prompt
+            if key == "text2image_prompt":
+                if "text2image_prompt" not in concept_config[concept_key] and "image_prompt" not in concept_config[concept_key]:
+                    missing_concept_keys.append("text2image_prompt or image_prompt")
+            elif key not in concept_config[concept_key]:
                 missing_concept_keys.append(key)
         
         if missing_concept_keys:
             raise ValidationError(
-                f"Missing required keys in generated_concept: {', '.join(missing_concept_keys)}",
-                f"generated_concept.{missing_concept_keys[0]}" if missing_concept_keys else None
+                f"Missing required keys in {concept_key}: {', '.join(missing_concept_keys)}",
+                f"{concept_key}.{missing_concept_keys[0]}" if missing_concept_keys else None
             )
         
         # Check for required text_overlay_config keys
@@ -309,13 +328,13 @@ class PipelineRunner:
         missing_text_keys = []
         
         for key in required_text_keys:
-            if key not in concept_config["generated_concept"]["text_overlay_config"]:
+            if key not in concept_config[concept_key]["text_overlay_config"]:
                 missing_text_keys.append(key)
         
         if missing_text_keys:
             raise ValidationError(
                 f"Missing required keys in text_overlay_config: {', '.join(missing_text_keys)}",
-                f"generated_concept.text_overlay_config.{missing_text_keys[0]}" if missing_text_keys else None
+                f"{concept_key}.text_overlay_config.{missing_text_keys[0]}" if missing_text_keys else None
             )
     
     def _create_output_dir(self, concept_config: Dict[str, Any]) -> str:
@@ -363,8 +382,11 @@ class PipelineRunner:
             APIError: If the asset generation fails.
         """
         # Extract information from the concept configuration
+        # Determine which key to use for concept data
+        concept_key = "generated_concept" if "generated_concept" in concept_config else "llm_processing"
+        generated_concept = concept_config[concept_key]
+        
         # Use text2image_prompt, but fall back to firefly_prompt or image_prompt for backward compatibility
-        generated_concept = concept_config["generated_concept"]
         if "text2image_prompt" in generated_concept:
             prompt = generated_concept["text2image_prompt"]
         elif "firefly_prompt" in generated_concept:
@@ -374,7 +396,7 @@ class PipelineRunner:
             prompt = generated_concept["image_prompt"]
             logger.warning("Using image_prompt instead of text2image_prompt (deprecated)")
         else:
-            raise ValueError("No text2image_prompt, firefly_prompt, or image_prompt found in generated_concept")
+            raise ValueError(f"No text2image_prompt, firefly_prompt, or image_prompt found in {concept_key}")
         
         # Generate the asset(s)
         asset_paths = self.asset_generator.generate_asset(
@@ -536,8 +558,11 @@ class PipelineRunner:
                     ["api_endpoint"]
                 )
         
+        # Determine which key to use for concept data
+        concept_key = "generated_concept" if "generated_concept" in concept_config else "llm_processing"
+        
         # Get the text overlay configuration
-        text_config = concept_config["generated_concept"]["text_overlay_config"]
+        text_config = concept_config[concept_key]["text_overlay_config"]
         
         # Get the target language
         target_language = concept_config["localization"]["target_language"]
