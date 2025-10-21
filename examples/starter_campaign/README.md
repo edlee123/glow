@@ -148,6 +148,13 @@ Generate assets for all concepts in the campaign:
 glow concept2asset "examples/starter_campaign/**/*.json"
 ```
 
+> **IMPORTANT**: When using the `**` recursive glob pattern, you **must** enclose the pattern in quotes to prevent shell expansion. For example: `"examples/starter_campaign/**/concept7*.json"`. Without quotes, the shell will expand the pattern before passing it to the command, which can cause errors.
+
+Generate a single image for concept7 files:
+```bash
+glow concept2asset "examples/starter_campaign/**/concept7*.json" -n1
+```
+
 Generate multiple images per concept:
 ```bash
 glow concept2asset examples/starter_campaign/relaxation_tea/concept1_1_1.json --num-images 5

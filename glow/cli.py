@@ -287,13 +287,13 @@ def find_files(pattern: str) -> List[str]:
         return []
 
 @main.command()
-@click.argument('concept_config_pattern', type=str)
+@click.argument('concept_config_pattern', type=str, nargs=-1)
 @click.option('--output-dir', '-o', type=click.Path(file_okay=False, dir_okay=True), help='Output directory (default: same directory as each concept file)')
 @click.option('--no-text', is_flag=True, help='Generate image without text overlay')
 @click.option('--num-images', '-n', type=int, default=3, help='Number of images to generate (default: 3)')
 @click.option('--model', type=click.Choice(['gemini', 'openai']), default='gemini',
               help='Model to use for image generation. Options: gemini (Google Gemini 2.5 Flash Image), openai (OpenAI GPT-5-image-mini with multiple aspect ratios). Default: gemini')
-def concept2asset(concept_config_pattern: str, output_dir: Optional[str] = None, no_text: bool = False, num_images: int = 3, model: str = 'gemini'):
+def concept2asset(concept_config_pattern, output_dir: Optional[str] = None, no_text: bool = False, num_images: int = 3, model: str = 'gemini'):
     """
     Generate assets from concept configuration(s).
     
@@ -301,10 +301,14 @@ def concept2asset(concept_config_pattern: str, output_dir: Optional[str] = None,
     
     To search subdirectories, use the '**' pattern in your glob pattern.
     
+    IMPORTANT: When using glob patterns with special characters like * or **,
+    you must enclose the pattern in quotes to prevent shell expansion:
+    
     Examples:
       glow concept2asset examples/dpop_campaign/d-pop_golf_collection/concept1_1_1.json
       glow concept2asset "examples/dpop_campaign/*/concept*.json"
       glow concept2asset "examples/starter_campaign/**/*.json"  # Use ** to search all subdirectories
+      glow concept2asset "examples/starter_campaign/**/concept7*.json" -n1  # Generate 1 image for concept7 files
     
     The tool will:
     1. Create a subfolder based on the aspect ratio (e.g., 1_1, 9_16) in the concept file's directory
@@ -315,8 +319,25 @@ def concept2asset(concept_config_pattern: str, output_dir: Optional[str] = None,
     from glow.concept2asset.asset_generator import AssetGenerator
     
     try:
-        # Find all concept files matching the pattern
-        all_concept_paths = find_files(concept_config_pattern)
+        # Handle both shell-expanded patterns and single patterns
+        all_concept_paths = []
+        
+        if len(concept_config_pattern) > 1:
+            # Shell has expanded the pattern into multiple files
+            logger.info(f"Processing {len(concept_config_pattern)} files from shell expansion")
+            # Process each file individually
+            for file_path in concept_config_pattern:
+                # Check if the file exists
+                if os.path.isfile(file_path):
+                    all_concept_paths.append(file_path)
+                else:
+                    logger.warning(f"File not found: {file_path}")
+        else:
+            # Single pattern (possibly with wildcards)
+            pattern = concept_config_pattern[0] if concept_config_pattern else ""
+            logger.info(f"Processing glob pattern: {pattern}")
+            # Find all concept files matching the pattern
+            all_concept_paths = find_files(pattern)
         
         if not all_concept_paths:
             logger.error(f"No files found matching pattern: {concept_config_pattern}")
