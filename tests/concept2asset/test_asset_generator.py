@@ -11,7 +11,7 @@ from unittest.mock import patch, MagicMock
 from pathlib import Path
 
 from glow.concept2asset.asset_generator import AssetGenerator
-from glow.concept2asset.adapters.image_generation import OpenRouterDallE3Adapter
+from glow.concept2asset.adapters.image_generation import OpenRouterGeminiAdapter
 
 # Sample concept configuration for testing
 SAMPLE_CONCEPT = {
@@ -58,7 +58,7 @@ class TestAssetGenerator:
         Set up test environment.
         """
         # Create a mock adapter
-        self.mock_adapter = MagicMock(spec=OpenRouterDallE3Adapter)
+        self.mock_adapter = MagicMock(spec=OpenRouterGeminiAdapter)
         
         # Configure the mock adapter
         self.mock_adapter.get_supported_resolutions.return_value = [
@@ -76,7 +76,7 @@ class TestAssetGenerator:
         """
         # Test with default adapter
         generator = AssetGenerator()
-        assert isinstance(generator.adapter, OpenRouterDallE3Adapter)
+        assert isinstance(generator.adapter, OpenRouterGeminiAdapter)
         
         # Test with custom adapter
         assert self.generator.adapter == self.mock_adapter
@@ -170,7 +170,7 @@ class TestAssetGenerator:
         invalid_concept["llm_processing"] = {"model": "gpt-4"}
         with pytest.raises(ValueError) as e:
             self.generator.generate_asset(invalid_concept)
-        assert "No image_prompt" in str(e.value)
+        assert "No text2image_prompt, image_prompt, or firefly_prompt" in str(e.value)
         
         # Test missing aspect_ratio
         invalid_concept = SAMPLE_CONCEPT.copy()

@@ -108,21 +108,38 @@ class TestMockData:
         concepts = self.processor.generate_concepts(brief, num_concepts, output_format)
         
         # Check that the correct number of concepts were generated
-        assert len(concepts) == num_concepts
+        # concepts is a dictionary mapping product names to lists of concept file paths
+        # Get the first product's concepts (there should be only one product in the test)
+        product_name = list(concepts.keys())[0]
+        product_concepts = concepts[product_name]
+        assert len(product_concepts) == num_concepts
         
-        # Check that each concept has the required fields
-        for concept in concepts:
+        # Load each concept file and check its contents
+        for concept_path in product_concepts:
+            with open(concept_path, 'r') as f:
+                concept = json.load(f)
+                
+            # Check that each concept has the required fields
             assert "generation_id" in concept
             assert "timestamp" in concept
             assert "input_brief" in concept
             assert "product" in concept
             assert "aspect_ratio" in concept
             assert "concept" in concept
-            assert "llm_processing" in concept
+            
+            # Check for either llm_processing or generated_concept
+            assert any(key in concept for key in ["llm_processing", "generated_concept"])
+            
+            # Determine which key is used
+            concept_key = "generated_concept" if "generated_concept" in concept else "llm_processing"
+            
             assert "image_generation" in concept
             
-            # Check that the llm_processing section has the required fields
-            assert "model" in concept["llm_processing"]
-            assert "creative_direction" in concept["llm_processing"]
-            assert "image_prompt" in concept["llm_processing"]
-            assert "text_overlay_config" in concept["llm_processing"]
+            # Check that the concept section has the required fields
+            assert "model" in concept[concept_key]
+            assert "creative_direction" in concept[concept_key]
+            
+            # Check for either text2image_prompt or image_prompt
+            assert any(key in concept[concept_key] for key in ["text2image_prompt", "image_prompt"])
+            
+            assert "text_overlay_config" in concept[concept_key]

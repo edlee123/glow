@@ -234,12 +234,12 @@ class TestTextProcessor:
         # Test with different aspect ratios and text lengths
         test_cases = [
             # (aspect_ratio, text_length, expected_size_range)
-            ("1:1", 10, (32, 40)),    # Short text, square format
-            ("1:1", 40, (25, 35)),    # Long text, square format
-            ("16:9", 10, (38, 46)),   # Short text, landscape format
-            ("16:9", 40, (30, 40)),   # Long text, landscape format
-            ("9:16", 10, (28, 36)),   # Short text, portrait format
-            ("9:16", 40, (22, 32))    # Long text, portrait format
+            ("1:1", 10, (90, 110)),    # Short text, square format (10% of 1024)
+            ("1:1", 40, (80, 95)),     # Long text, square format (10% of 1024 * 0.8)
+            ("16:9", 10, (90, 110)),   # Short text, landscape format (10% of 1024)
+            ("16:9", 40, (80, 95)),    # Long text, landscape format (10% of 1024 * 0.8)
+            ("9:16", 10, (160, 190)),  # Short text, portrait format (10% of 1792)
+            ("9:16", 40, (140, 160))   # Long text, portrait format (10% of 1792 * 0.8)
         ]
         
         for aspect_ratio, text_length, expected_range in test_cases:

@@ -10,11 +10,11 @@ import requests
 from unittest.mock import patch, MagicMock
 from pathlib import Path
 
-from glow.concept2asset.adapters.image_generation import OpenRouterDallE3Adapter
+from glow.concept2asset.adapters.image_generation import OpenRouterGeminiAdapter
 
-class TestOpenRouterDallE3Adapter:
+class TestOpenRouterGeminiAdapter:
     """
-    Tests for the OpenRouterDallE3Adapter.
+    Tests for the OpenRouterGeminiAdapter.
     """
     
     def setup_method(self):
@@ -22,7 +22,7 @@ class TestOpenRouterDallE3Adapter:
         Set up test environment.
         """
         # Use a mock API key for testing
-        self.adapter = OpenRouterDallE3Adapter(api_key="test_api_key")
+        self.adapter = OpenRouterGeminiAdapter(api_key="test_api_key")
         
     def test_initialization(self):
         """
@@ -30,7 +30,7 @@ class TestOpenRouterDallE3Adapter:
         """
         assert self.adapter.api_key == "test_api_key"
         assert self.adapter.api_base == "https://openrouter.ai/api/v1"
-        assert self.adapter.model == "openai/dall-e-3"
+        assert self.adapter.model == "google/gemini-2.5-flash-image"
         assert len(self.adapter.get_supported_resolutions()) > 0
     
     def test_get_service_info(self):
@@ -97,12 +97,21 @@ class TestOpenRouterDallE3Adapter:
         """
         Test that the adapter can generate images.
         """
-        # Mock the response
+        # Mock the response for Gemini format
         mock_response = MagicMock()
         mock_response.json.return_value = {
-            "data": [
+            "choices": [
                 {
-                    "b64_json": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                    "message": {
+                        "images": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                                }
+                            }
+                        ]
+                    }
                 }
             ]
         }
@@ -117,10 +126,12 @@ class TestOpenRouterDallE3Adapter:
         # Check that the API was called with the correct parameters
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
-        assert args[0] == "https://openrouter.ai/api/v1/images/generations"
-        assert kwargs["json"]["prompt"] == prompt
-        assert kwargs["json"]["size"] == "1024x1024"
-        assert kwargs["json"]["model"] == "openai/dall-e-3"
+        assert args[0] == "https://openrouter.ai/api/v1/chat/completions"
+        # Check the message content for the prompt
+        assert kwargs["json"]["messages"][0]["content"][0]["text"].startswith(prompt)
+        # Gemini doesn't use size parameter, it uses dimensions in the prompt
+        assert f"{width}x{height}" in kwargs["json"]["messages"][0]["content"][0]["text"]
+        assert kwargs["json"]["model"] == "google/gemini-2.5-flash-image"
         
         # Check that the output path exists
         assert os.path.exists(output_path)
@@ -133,12 +144,21 @@ class TestOpenRouterDallE3Adapter:
         """
         Test that the adapter can generate images with options.
         """
-        # Mock the response
+        # Mock the response for Gemini format
         mock_response = MagicMock()
         mock_response.json.return_value = {
-            "data": [
+            "choices": [
                 {
-                    "b64_json": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                    "message": {
+                        "images": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                                }
+                            }
+                        ]
+                    }
                 }
             ]
         }
@@ -158,9 +178,13 @@ class TestOpenRouterDallE3Adapter:
         # Check that the API was called with the correct parameters
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
-        assert kwargs["json"]["negative_prompt"] == "blurry, distorted"
-        assert kwargs["json"]["quality"] == "hd"
-        assert kwargs["json"]["style"] == "natural"
+        # Check for negative prompt in the content
+        negative_prompt_found = False
+        for content_item in kwargs["json"]["messages"][0]["content"]:
+            if content_item["type"] == "text" and "Negative prompt: blurry, distorted" in content_item["text"]:
+                negative_prompt_found = True
+                break
+        assert negative_prompt_found, "Negative prompt not found in request"
         
         # Clean up
         os.remove(output_path)
@@ -176,12 +200,21 @@ class TestOpenRouterDallE3Adapter:
         mock_img.size = (1024, 1024)
         mock_open.return_value.__enter__.return_value = mock_img
         
-        # Mock the response
+        # Mock the response for Gemini format
         mock_response = MagicMock()
         mock_response.json.return_value = {
-            "data": [
+            "choices": [
                 {
-                    "b64_json": "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                    "message": {
+                        "images": [
+                            {
+                                "type": "image_url",
+                                "image_url": {
+                                    "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=="
+                                }
+                            }
+                        ]
+                    }
                 }
             ]
         }
@@ -196,8 +229,9 @@ class TestOpenRouterDallE3Adapter:
         # Check that the API was called with the correct parameters
         mock_post.assert_called_once()
         args, kwargs = mock_post.call_args
-        assert "Create a variation of an image" in kwargs["json"]["prompt"]
-        assert prompt in kwargs["json"]["prompt"]
+        # Check the message content for the prompt
+        assert "Create a variation of an image" in kwargs["json"]["messages"][0]["content"][0]["text"]
+        assert prompt in kwargs["json"]["messages"][0]["content"][0]["text"]
         
         # Clean up
         os.remove(output_path)

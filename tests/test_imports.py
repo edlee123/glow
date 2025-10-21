@@ -48,7 +48,7 @@ def test_imports():
     from glow.concept2asset.adapters import (
         ImageGenerationAdapter,
         ImageEditingAdapter,
-        OpenRouterDallE3Adapter,
+        OpenRouterGeminiAdapter,
         PillowAdapter
     )
 
