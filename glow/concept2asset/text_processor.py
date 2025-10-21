@@ -4,6 +4,21 @@ Text styling configuration generation.
 This module provides functionality for generating text styling configurations
 based on campaign briefs and concept configurations. It handles font selection,
 color selection, and positioning of text overlays.
+
+Font Handling:
+When a concept specifies a font that isn't available in the system:
+1. The TextProcessor selects fonts from the FONT_CATEGORIES dictionary
+2. The selected font is passed to the ImageEditor
+3. The ImageEditor attempts to load the font from:
+   a. The fonts directory (glow/concept2asset/fonts/)
+   b. The system fonts
+4. If the font cannot be found, the ImageEditor falls back to:
+   a. The default font (Montserrat-Regular)
+   b. If the default font is not available, it uses the Pillow default font
+
+To ensure proper font rendering, make sure the fonts listed in FONT_CATEGORIES
+are available in the fonts directory. The simplified list includes only the
+essential fonts needed for the application to function properly.
 """
 
 import os
@@ -17,13 +32,13 @@ from glow.core.logging_config import get_logger
 # Initialize logger
 logger = get_logger(__name__)
 
-# Font categories and examples
+# Font categories with simplified options (one primary font per category)
 FONT_CATEGORIES = {
-    "serif": ["Times New Roman", "Georgia", "Garamond", "Baskerville", "Playfair Display"],
-    "sans-serif": ["Arial", "Helvetica", "Montserrat", "Open Sans", "Roboto", "Futura"],
-    "display": ["Impact", "Bebas Neue", "Oswald", "Anton", "Abril Fatface"],
-    "script": ["Brush Script MT", "Pacifico", "Dancing Script", "Great Vibes"],
-    "monospace": ["Courier New", "Roboto Mono", "Source Code Pro"]
+    "serif": ["PlayfairDisplay-Regular"],
+    "sans-serif": ["Montserrat", "OpenSans-Regular", "Roboto-Regular"],
+    "display": ["Anton-Regular"],
+    "script": ["DancingScript-Regular"],
+    "monospace": ["RobotoMono-Regular"]
 }
 
 # Font weights
@@ -206,6 +221,16 @@ class TextProcessor:
     def _select_font(self, concept_config: Dict[str, Any]) -> str:
         """
         Select a font based on the concept configuration.
+        
+        This method analyzes the creative direction in the concept configuration
+        and selects an appropriate font from the FONT_CATEGORIES dictionary.
+        
+        If the selected font is not available in the system when the ImageEditor
+        tries to use it, the ImageEditor will fall back to:
+        1. Looking for the font in the fonts directory (glow/concept2asset/fonts/)
+        2. Looking for the font in the system fonts
+        3. Using the default font (Montserrat-Regular)
+        4. Using the Pillow default font as a last resort
         
         Args:
             concept_config (Dict[str, Any]): Concept configuration

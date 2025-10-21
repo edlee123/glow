@@ -33,10 +33,17 @@ class ImageEditor:
             font_dir: Optional directory containing font files. If not provided,
                       system fonts will be used.
         """
-        self.font_dir = font_dir
+        # Use the fonts directory in the package if not provided
+        if font_dir is None:
+            # Use the fonts directory in the package
+            self.font_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+            # Create the directory if it doesn't exist
+            os.makedirs(self.font_dir, exist_ok=True)
+        else:
+            self.font_dir = font_dir
         
         # Default font to use if specified font is not found
-        self.default_font = "Arial"
+        self.default_font = "Montserrat-Regular"
         
         # Default font size if not specified
         # For a 1024x1024 image, 5% of height = ~51
@@ -503,13 +510,31 @@ class ImageEditor:
         
         # Try to load the font from the font directory if provided
         if self.font_dir:
-            # Check if the font file exists in the font directory
-            font_path = os.path.join(self.font_dir, f"{font_name}.ttf")
-            if os.path.isfile(font_path):
-                try:
-                    return ImageFont.truetype(font_path, font_size)
-                except Exception as e:
-                    logger.warning(f"Failed to load font {font_path}: {e}")
+            # Check for various font file extensions
+            for ext in ['.ttf', '.otf', '.TTF', '.OTF']:
+                # Try exact filename match
+                font_path = os.path.join(self.font_dir, f"{font_name}{ext}")
+                if os.path.isfile(font_path):
+                    try:
+                        return ImageFont.truetype(font_path, font_size)
+                    except Exception as e:
+                        logger.warning(f"Failed to load font {font_path}: {e}")
+                
+                # Try with spaces replaced by underscores
+                font_path = os.path.join(self.font_dir, f"{font_name.replace(' ', '_')}{ext}")
+                if os.path.isfile(font_path):
+                    try:
+                        return ImageFont.truetype(font_path, font_size)
+                    except Exception as e:
+                        logger.warning(f"Failed to load font {font_path}: {e}")
+                
+                # Try with spaces removed
+                font_path = os.path.join(self.font_dir, f"{font_name.replace(' ', '')}{ext}")
+                if os.path.isfile(font_path):
+                    try:
+                        return ImageFont.truetype(font_path, font_size)
+                    except Exception as e:
+                        logger.warning(f"Failed to load font {font_path}: {e}")
         
         # Try to load the font from the system
         try:
@@ -529,15 +554,23 @@ class ImageEditor:
                 
                 # Create a larger bitmap font by scaling
                 try:
-                    # Try to use a common system font that's likely to be available
-                    common_fonts = ["DejaVuSans.ttf", "Arial.ttf", "Verdana.ttf", "Tahoma.ttf", "FreeSans.ttf"]
+                    # Try fonts that we know are in our fonts directory
+                    common_fonts = [
+                        os.path.join(self.font_dir, "Montserrat-Regular.ttf"),
+                        os.path.join(self.font_dir, "OpenSans-Regular.ttf"),
+                        os.path.join(self.font_dir, "Roboto-Regular.ttf"),
+                        os.path.join(self.font_dir, "PlayfairDisplay-Regular.ttf")
+                    ]
+                    
                     for common_font in common_fonts:
-                        try:
-                            return ImageFont.truetype(common_font, font_size)
-                        except:
-                            continue
-                except:
-                    pass
+                        if os.path.exists(common_font):
+                            try:
+                                return ImageFont.truetype(common_font, font_size)
+                            except Exception as e:
+                                logger.warning(f"Failed to load font {common_font}: {e}")
+                                continue
+                except Exception as e:
+                    logger.warning(f"Error trying common fonts: {e}")
                 
                 # If all else fails, return the default font
                 # Note: The default font may not respect the requested size

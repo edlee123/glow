@@ -24,6 +24,18 @@ For each concept, you should provide:
 
 Your concepts should be visually striking, on-brand, and effectively communicate the campaign message
 to the target audience. Each concept should be distinct and offer a different creative approach.
+
+IMPORTANT: For font selection, please ONLY use one of the following available fonts:
+- Montserrat-Regular (sans-serif)
+- Montserrat Bold (sans-serif, good for headlines)
+- OpenSans-Regular (sans-serif)
+- Roboto-Regular (sans-serif)
+- PlayfairDisplay-Regular (serif)
+- Anton-Regular (display)
+- DancingScript-Regular (script)
+- RobotoMono-Regular (monospace)
+
+These are the only fonts available in the system, so using other fonts will result in fallback to default.
 """
 
 # User prompt template for concept generation
@@ -299,7 +311,7 @@ def parse_llm_response(llm_response: str) -> Dict[str, Any]:
                     "text_overlay_config": {
                         "primary_text": "Placeholder text",
                         "text_position": "bottom",
-                        "font": "Arial",
+                        "font": "Montserrat-Regular",
                         "color": "#FFFFFF",
                         "shadow": True,
                         "shadow_color": "#00000080"
@@ -320,7 +332,7 @@ def parse_llm_response(llm_response: str) -> Dict[str, Any]:
             "text_overlay_config": {
                 "primary_text": "Placeholder text",
                 "text_position": "bottom",
-                "font": "Arial",
+                "font": "Montserrat-Regular",
                 "color": "#FFFFFF",
                 "shadow": True,
                 "shadow_color": "#00000080"
