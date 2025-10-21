@@ -13,25 +13,42 @@ The D-Pop campaign demonstrates how Glow can generate creative assets for divers
 
 From product reference:
 
-<img src="https://drive.google.com/uc?export=view&id=1HPEQMLPiyGGyutxz3-L4gFlDSVaSiZRE" width="100" alt="Demon Pop Bottle">
-
-<img src="https://drive.google.com/uc?export=view&id=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="100" alt="Reference image"> 
+<table>
+  <tr>
+    <td><img src="https://drive.google.com/uc?export=view&id=1HPEQMLPiyGGyutxz3-L4gFlDSVaSiZRE" width="200" alt="Demon Pop Bottle"></td>
+    <td><img src="https://drive.google.com/uc?export=view&id=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="200" alt="Reference image"></td>
+  </tr>
+</table>
 
 To sample assets:
 
-<img src="https://drive.google.com/uc?export=view&id=1rfjQ8o-MWnlA8cNRLnsmo6lGRbSxrt1B" width="200" alt="Demon Pop Sample Asset 1">
-<img src="https://drive.google.com/uc?export=view&id=13EyRnbkgzIkMIimAsbQ2DPDVNHAqQJS6" width="200" alt="Demon Pop Sample Asset 2">
+<table>
+  <tr>
+    <td><img src="https://drive.google.com/uc?export=view&id=1rfjQ8o-MWnlA8cNRLnsmo6lGRbSxrt1B" width="300" alt="Demon Pop Sample Asset 1"></td>
+    <td><img src="https://drive.google.com/uc?export=view&id=13EyRnbkgzIkMIimAsbQ2DPDVNHAqQJS6" width="300" alt="Demon Pop Sample Asset 2"></td>
+  </tr>
+</table>
 
 ### Example 2: D-Pop Golf Collection - Parent-focused Fashion
 
 From product reference to generated campaign asset:
 
-<img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="100" alt="Beach Shirt"> → 
+<table>
+  <tr>
+    <td><img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="200" alt="Beach Shirt"></td>
+    <td>→</td>
+    <td><img src="https://drive.google.com/uc?export=view&id=1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="200" alt="Golf Family Campaign 1"></td>
+  </tr>
+</table>
 
 To sample assets:
 
-<img src="https://drive.google.com/uc?export=view&id=1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="200" alt="Golf Family Campaign 1">
-<img src="https://drive.google.com/uc?export=view&id=1GQvXkvyKOxPerRpUYLNeCeFW7CQdUtMh" width="200" alt="Golf Family Campaign 2">
+<table>
+  <tr>
+    <td><img src="https://drive.google.com/uc?export=view&id=1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="300" alt="Golf Family Campaign 1"></td>
+    <td><img src="https://drive.google.com/uc?export=view&id=1GQvXkvyKOxPerRpUYLNeCeFW7CQdUtMh" width="300" alt="Golf Family Campaign 2"></td>
+  </tr>
+</table>
 
 ## Prerequisites
 
