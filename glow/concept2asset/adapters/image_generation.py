@@ -12,6 +12,7 @@ import json
 import requests
 import tempfile
 import copy
+import logging
 from typing import Dict, Any, List, Optional, Union, Tuple
 from pathlib import Path
 import base64
@@ -219,7 +220,10 @@ class OpenRouterAdapter(ImageGenerationAdapter):
             debug_headers = headers.copy()
             debug_headers["Authorization"] = "Bearer [REDACTED]"
             logger.debug(f"Request headers: {json.dumps(debug_headers)}")
-            logger.debug(f"Request payload: {json.dumps(payload)}")
+            
+            # Truncate the payload for logging to avoid large image data
+            truncated_payload = self._truncate_request_for_logging(payload)
+            logger.debug(f"Request payload (truncated): {json.dumps(truncated_payload)}")
             
             # Make the API request
             response = requests.post(
@@ -238,8 +242,14 @@ class OpenRouterAdapter(ImageGenerationAdapter):
             
             # Create a truncated version of the response for logging
             truncated_result = self._truncate_response_for_logging(result)
-            logger.info(f"Response: {json.dumps(truncated_result)}")  # Log truncated response
-            logger.debug(f"Full response: {json.dumps(result)}")  # Log the full response for debugging
+            # Only log a summary of the response at INFO level
+            logger.info(f"Response received with {len(result.get('choices', []))} choices")
+            
+            # For debug level, use a more aggressive truncation for any base64 data
+            if logger.isEnabledFor(logging.DEBUG):
+                # Further sanitize the truncated result to ensure no base64 data is included
+                sanitized_result = self._sanitize_response_for_debug(truncated_result)
+                logger.debug(f"Response details (sanitized): {json.dumps(sanitized_result)}")
             
             # Extract image URL from the response
             logger.debug("Extracting image URL from response")
@@ -264,11 +274,17 @@ class OpenRouterAdapter(ImageGenerationAdapter):
                             # Handle Gemini format where images are in the "images" array
                             if "type" in images[0] and images[0]["type"] == "image_url" and "image_url" in images[0]:
                                 image_url = images[0]["image_url"]["url"]
-                                logger.info(f"Found image_url in Gemini format: {image_url}")
+                                if image_url.startswith('data:image/'):
+                                    logger.info("Found base64 image data in Gemini format")
+                                else:
+                                    logger.info(f"Found image URL in Gemini format: {image_url[:30]}...")
                             # Handle other formats
                             elif "image_url" in images[0]:
                                 image_url = images[0]["image_url"]["url"]
-                                logger.info(f"Found image_url in images: {image_url}")
+                                if image_url.startswith('data:image/'):
+                                    logger.info("Found base64 image data in images")
+                                else:
+                                    logger.info(f"Found image URL in images: {image_url[:30]}...")
                     
                     # If no images found, check content
                     elif "message" in choice and "content" in choice["message"]:
@@ -316,7 +332,17 @@ class OpenRouterAdapter(ImageGenerationAdapter):
                 # Process each image URL
                 for idx, image_url in enumerate(image_urls):
                     logger.info(f"Processing image {idx + 1} of {len(image_urls)}")
-                    logger.debug(f"Image URL starts with: {image_url[:30]}...")
+                    # Log only the beginning of the URL to avoid excessive logging
+                    if image_url.startswith('data:image/'):
+                        logger.debug("Image URL is a base64 data URL (not logged)")
+                    else:
+                        # Only log the protocol and domain for regular URLs
+                        import re
+                        domain_match = re.match(r'(https?://[^/]+)', image_url)
+                        if domain_match:
+                            logger.debug(f"Image URL domain: {domain_match.group(1)}")
+                        else:
+                            logger.debug("Image URL in unknown format (not logged)")
                     
                     # Create a structured filename
                     
@@ -417,7 +443,9 @@ class OpenRouterAdapter(ImageGenerationAdapter):
             else:
                 # Log detailed error information
                 logger.error("No image URLs found in response")
-                logger.error(f"Full response: {json.dumps(result)}")
+                # Use truncated version for error logging too
+                truncated_result = self._truncate_response_for_logging(result)
+                logger.error(f"Response (truncated): {json.dumps(truncated_result)}")
                 
                 # Check if there's an error message in the response
                 if "error" in result:
@@ -434,10 +462,54 @@ class OpenRouterAdapter(ImageGenerationAdapter):
             error_msg = f"Error generating image: {str(e)}"
             logger.error(error_msg)
             raise Exception(error_msg)
+    def _truncate_request_for_logging(self, request_data):
+        """
+        Create a truncated version of the request for logging purposes.
+        Thoroughly truncates base64 image data and other large content.
+        
+        Args:
+            request_data (dict): The original request data
+            
+        Returns:
+            dict: A truncated copy of the request data
+        """
+        if not isinstance(request_data, dict):
+            return request_data
+            
+        # Create a deep copy to avoid modifying the original
+        truncated = copy.deepcopy(request_data)
+        
+        # Special handling for messages with content that might contain images
+        if "messages" in truncated:
+            for message in truncated["messages"]:
+                if "content" in message:
+                    # Handle content as list (multimodal case)
+                    if isinstance(message["content"], list):
+                        for i, content_item in enumerate(message["content"]):
+                            if isinstance(content_item, dict):
+                                # Truncate image_url content
+                                if content_item.get("type") == "image_url" and "image_url" in content_item:
+                                    if "url" in content_item["image_url"]:
+                                        url = content_item["image_url"]["url"]
+                                        if url.startswith("data:image"):
+                                            # Replace base64 data with placeholder
+                                            content_item["image_url"]["url"] = "data:image/jpeg;base64,<base64_data_truncated>"
+                                        else:
+                                            # Keep the URL but note it's an image
+                                            content_item["image_url"]["url"] = f"{url[:30]}...<image_url_truncated>"
+                    # Handle content as string
+                    elif isinstance(message["content"], str) and len(message["content"]) > 100:
+                        message["content"] = message["content"][:100] + "...<truncated>"
+        
+        # Recursively process other parts of the data
+        self._recursively_truncate_data(truncated)
+        
+        return truncated
+        
     def _truncate_response_for_logging(self, response_data):
         """
         Create a truncated version of the response for logging purposes.
-        Truncates base64 image data and other large content.
+        Thoroughly truncates base64 image data and other large content.
         
         Args:
             response_data (dict): The original response data
@@ -451,310 +523,138 @@ class OpenRouterAdapter(ImageGenerationAdapter):
         # Create a deep copy to avoid modifying the original
         truncated = copy.deepcopy(response_data)
         
-        # Truncate base64 data in choices
+        # Special handling for choices that might contain images
         if "choices" in truncated and isinstance(truncated["choices"], list):
             for choice in truncated["choices"]:
                 if "message" in choice:
-                    # Truncate images in message
+                    # Handle images array
                     if "images" in choice["message"]:
                         for i, image in enumerate(choice["message"]["images"]):
-                            if isinstance(image, dict):
-                                if "image_url" in image and "url" in image["image_url"]:
+                            if isinstance(image, dict) and "image_url" in image:
+                                if "url" in image["image_url"]:
                                     url = image["image_url"]["url"]
                                     if url.startswith("data:image"):
-                                        # Truncate base64 data
-                                        parts = url.split(",", 1)
-                                        if len(parts) > 1:
-                                            image["image_url"]["url"] = f"{parts[0]},<base64_data_truncated>"
+                                        # Replace base64 data with placeholder
+                                        image["image_url"]["url"] = "data:image/jpeg;base64,<base64_data_truncated>"
+                                    else:
+                                        # Keep the URL but note it's an image
+                                        image["image_url"]["url"] = f"{url[:30]}...<image_url_truncated>"
                     
-                    # Truncate content in message
+                    # Handle content field
                     if "content" in choice["message"]:
                         content = choice["message"]["content"]
-                        if isinstance(content, str) and len(content) > 100:
-                            # Check if it contains base64 data
-                            if "data:image" in content:
-                                # Truncate at the base64 data
-                                idx = content.find("data:image")
-                                if idx >= 0:
-                                    choice["message"]["content"] = content[:idx+20] + "...<base64_data_truncated>"
-                            else:
-                                # Just truncate long content
-                                choice["message"]["content"] = content[:100] + "...<truncated>"
+                        # Handle content as list
+                        if isinstance(content, list):
+                            for i, content_item in enumerate(content):
+                                if isinstance(content_item, dict) and "image_url" in content_item:
+                                    if "url" in content_item["image_url"]:
+                                        url = content_item["image_url"]["url"]
+                                        if url.startswith("data:image"):
+                                            content_item["image_url"]["url"] = "data:image/jpeg;base64,<base64_data_truncated>"
+                                        else:
+                                            content_item["image_url"]["url"] = f"{url[:30]}...<image_url_truncated>"
+                        # Handle content as string
+                        elif isinstance(content, str) and len(content) > 100:
+                            choice["message"]["content"] = content[:100] + "...<truncated>"
+        
+        # Recursively process the rest of the response data
+        self._recursively_truncate_data(truncated)
         
         return truncated
         
-        # Prepare request payload
-        payload = {
-            "model": self.model,
-            "prompt": prompt,
-            "size": size,
-            "n": options.get("n", 1),
-            "quality": options.get("quality", "standard"),
-            "style": options.get("style", "vivid"),
-            "response_format": "b64_json"
-        }
+    def _sanitize_response_for_debug(self, data):
+        """
+        Create a sanitized version of the response data for debug logging,
+        completely removing any base64 encoded images or large data.
         
-        # Log the prompt
-        logger.info(f"Full prompt: {prompt}")
-        
-        # Add negative prompt if provided
-        if "negative_prompt" in options:
-            payload["negative_prompt"] = options["negative_prompt"]
-        
-        # Prepare headers
-        headers = {
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        }
-        
-        # Make API request
-        try:
-            logger.debug("Starting API request process")
-            logger.info(f"Making API request to {self.endpoint}")
+        Args:
+            data: The data structure to sanitize (dict, list, or primitive)
             
-            # Format the request for the chat completions endpoint
-            chat_payload = {
-                "model": self.model,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": prompt
-                            }
-                        ]
-                    }
-                ],
-                "response_format": {"type": "image_url"}
-            }
-            
-            # Log the chat payload
-            logger.info(f"Chat payload: {json.dumps(chat_payload)}")
-            
-            # Add negative prompt if provided
-            if "negative_prompt" in options:
-                chat_payload["messages"][0]["content"].append({
-                    "type": "text",
-                    "text": f"Negative prompt: {options['negative_prompt']}"
-                })
-            
-            # Add size parameter if needed
-            if "dalle" in self.model.lower():
-                chat_payload["size"] = f"{width}x{height}"
-            
-            # Log the outgoing request (excluding the API key)
-            debug_headers = headers.copy()
-            debug_headers["Authorization"] = "Bearer [REDACTED]"
-            logger.info(f"Sending request to {self.endpoint} with model {self.model}")
-            logger.debug(f"Request headers: {json.dumps(debug_headers)}")
-            logger.debug(f"Request payload: {json.dumps(chat_payload)}")
-            
-            logger.info(f"Making API request to {self.endpoint}")
-            try:
-                # Log the headers and payload
-                debug_headers = headers.copy()
-                debug_headers["Authorization"] = "Bearer [REDACTED]"
-                logger.debug(f"Request headers: {json.dumps(debug_headers)}")
-                logger.debug(f"Request payload: {json.dumps(chat_payload)}")
-                
-                # Make the API request
-                logger.debug("Sending POST request to API")
-                response = requests.post(
-                    self.endpoint,
-                    headers=headers,
-                    json=chat_payload
-                )
-                logger.debug(f"API response received with status code {response.status_code}")
-                logger.info(f"API request completed with status code {response.status_code}")
-                
-                # Log the response text for debugging
-                logger.debug(f"Response text: {response.text[:200]}...")
-                
-                try:
-                    response.raise_for_status()
-                    logger.info(f"API request successful with status code {response.status_code}")
-                except requests.exceptions.HTTPError as http_err:
-                    logger.error(f"HTTP error occurred: {http_err}")
-                    logger.error(f"Response text: {response.text}")
-                    raise
-            except Exception as e:
-                logger.error(f"API request failed: {str(e)}")
-                raise
-            
-            # Parse response
-            logger.debug("Parsing JSON response")
-            try:
-                result = response.json()
-                logger.debug("Successfully parsed JSON response")
-            except json.JSONDecodeError as e:
-                logger.error(f"Failed to parse JSON response: {str(e)}")
-                logger.error(f"Response text: {response.text}")
-                raise
-            
-            # Create a truncated version of the response for logging
-            truncated_result = self._truncate_response_for_logging(result)
-            logger.info(f"Response: {json.dumps(truncated_result)}")  # Log truncated response
-            logger.debug(f"Full response: {json.dumps(result)}")  # Log the full response for debugging
-            
-            # Extract image URL from the response
-            logger.debug("Extracting image URL from response")
-            image_url = None
-            
-            if "choices" in result and len(result["choices"]) > 0:
-                logger.debug(f"Found {len(result['choices'])} choices in response")
-                choice = result["choices"][0]
-                logger.debug(f"Choice: {json.dumps(choice)}")  # Log the choice for debugging
-                
-                # Check for images in the message
-                if "message" in choice and "images" in choice["message"]:
-                    images = choice["message"]["images"]
-                    logger.debug(f"Found images in message: {json.dumps(images)}")
-                    
-                    if len(images) > 0:
-                        logger.debug(f"Found {len(images)} images in message")
-                        logger.debug(f"First image: {json.dumps(images[0])}")
-                        # Handle Gemini format where images are in the "images" array
-                        if "type" in images[0] and images[0]["type"] == "image_url" and "image_url" in images[0]:
-                            image_url = images[0]["image_url"]["url"]
-                            logger.info(f"Found image_url in Gemini format: {image_url}")
-                            logger.debug(f"Image URL format: {image_url[:30]}...")
-                        # Handle other formats
-                        elif "image_url" in images[0]:
-                            image_url = images[0]["image_url"]["url"]
-                            logger.info(f"Found image_url in images: {image_url}")
-                            logger.debug(f"Image URL format: {image_url[:30]}...")
-                
-                # If no images found, check content
-                elif "message" in choice and "content" in choice["message"]:
-                    content = choice["message"]["content"]
-                    logger.debug(f"Content: {content}")  # Log the content for debugging
-                    
-                    # Try to parse the content as JSON if it's a string
-                    if isinstance(content, str):
-                        try:
-                            content_json = json.loads(content)
-                            logger.debug(f"Parsed content JSON: {json.dumps(content_json)}")
-                            
-                            if "image_url" in content_json:
-                                image_url = content_json["image_url"]
-                            elif "url" in content_json:
-                                image_url = content_json["url"]
-                            else:
-                                # Look for URL pattern in the string
-                                import re
-                                url_match = re.search(r'https?://\S+', content)
-                                if url_match:
-                                    image_url = url_match.group(0)
-                                    logger.info(f"Found URL in content: {image_url}")
-                        except json.JSONDecodeError:
-                            logger.info("Content is not valid JSON, looking for URL in string")
-                            # Look for URL pattern in the string
-                            import re
-                            url_match = re.search(r'https?://\S+', content)
-                            if url_match:
-                                image_url = url_match.group(0)
-                                logger.info(f"Found URL in content: {image_url}")
-                    elif isinstance(content, list):
-                        # Handle content as a list of parts
-                        logger.debug(f"Content is a list with {len(content)} items")
-                        for i, part in enumerate(content):
-                            logger.debug(f"Part {i}: {json.dumps(part)}")
-                            if isinstance(part, dict) and "image_url" in part:
-                                image_url = part["image_url"]["url"]
-                                logger.debug(f"Found image_url in part {i}: {image_url}")
-                                break
-            
-            # If we found an image URL, download and save it
-            if image_url:
-                logger.info(f"Found image URL: {image_url}")
-                logger.debug(f"Image URL starts with: {image_url[:30]}...")
-                
-                # Create a unique filename
-                model_name = self.model.split("/")[-1].replace("-", "_")
-                filename = f"{model_name}_{uuid.uuid4()}.png"
-                output_dir = options.get("output_dir", tempfile.gettempdir())
-                logger.debug(f"Output directory: {output_dir}")
-                os.makedirs(output_dir, exist_ok=True)
-                output_path = os.path.join(output_dir, filename)
-                logger.debug(f"Output path: {output_path}")
-                
-                # Check if it's a data URL
-                if image_url.startswith('data:image/'):
-                    logger.debug("Processing data URL (base64 encoded image)")
-                    try:
-                        # Extract the base64 data
-                        header, encoded = image_url.split(",", 1)
-                        logger.debug(f"Base64 header: {header}")
-                        logger.debug(f"Base64 data length: {len(encoded)} characters")
-                        
-                        # Decode the base64 data
-                        data = base64.b64decode(encoded)
-                        logger.debug(f"Decoded data size: {len(data)} bytes")
-                        
-                        # Save image to file
-                        with open(output_path, "wb") as f:
-                            f.write(data)
-                        logger.info(f"Saved base64 image to {output_path}")
-                        
-                        # Verify file was created
-                        if os.path.exists(output_path):
-                            logger.debug(f"Verified file exists: {output_path}, size: {os.path.getsize(output_path)} bytes")
-                        else:
-                            logger.error(f"Failed to create file: {output_path}")
-                    except Exception as e:
-                        logger.error(f"Error processing base64 image: {str(e)}")
-                        raise
+        Returns:
+            A sanitized copy with all base64 data removed
+        """
+        if isinstance(data, dict):
+            result = {}
+            for key, value in data.items():
+                # Skip keys that might contain image data
+                if any(img_key in key.lower() for img_key in ["image", "img", "picture", "photo", "base64"]):
+                    result[key] = "<image_data_removed>"
                 else:
-                    logger.debug(f"Processing image URL: {image_url[:30]}...")
-                    try:
-                        # Download image from URL
-                        logger.debug("Sending GET request to download image")
-                        image_response = requests.get(image_url)
-                        logger.debug(f"Image download response status: {image_response.status_code}")
-                        image_response.raise_for_status()
-                        
-                        # Check content type and size
-                        content_type = image_response.headers.get('Content-Type', 'unknown')
-                        content_length = len(image_response.content)
-                        logger.debug(f"Downloaded image: Content-Type: {content_type}, Size: {content_length} bytes")
-                        
-                        # Save image to file
-                        with open(output_path, "wb") as f:
-                            f.write(image_response.content)
-                        logger.info(f"Downloaded and saved image to {output_path}")
-                        
-                        # Verify file was created
-                        if os.path.exists(output_path):
-                            logger.debug(f"Verified file exists: {output_path}, size: {os.path.getsize(output_path)} bytes")
-                        else:
-                            logger.error(f"Failed to create file: {output_path}")
-                    except Exception as e:
-                        logger.error(f"Error downloading image: {str(e)}")
-                        raise
-                
-                logger.info(f"Image saved to {output_path}")
-                return output_path
-            else:
-                # Log detailed error information
-                logger.error("No image URL found in response")
-                logger.error(f"Full response: {json.dumps(result)}")
-                
-                # Check if there's an error message in the response
-                if "error" in result:
-                    error_msg = f"API error: {json.dumps(result['error'])}"
-                    logger.error(error_msg)
-                    raise Exception(error_msg)
+                    result[key] = self._sanitize_response_for_debug(value)
+            return result
+        elif isinstance(data, list):
+            return [self._sanitize_response_for_debug(item) for item in data]
+        elif isinstance(data, str):
+            # Remove any base64 data completely
+            if "base64" in data or "data:image" in data:
+                return "<base64_data_removed>"
+            # Truncate long strings more aggressively
+            elif len(data) > 50:
+                return data[:50] + "...<truncated>"
+            return data
+        else:
+            return data
             
-            # If we get here, something went wrong
-            error_msg = "No image data in response"
-            logger.error(error_msg)
-            raise Exception(error_msg)
+    def _recursively_truncate_data(self, data, max_str_length=100):
+        """
+        Recursively process data structure to truncate large strings and base64 content.
+        
+        Args:
+            data: The data structure to process (dict, list, or primitive)
+            max_str_length: Maximum length for string values before truncation
+        """
+        if isinstance(data, dict):
+            for key, value in data.items():
+                # Process each value in the dictionary
+                data[key] = self._truncate_value(value, max_str_length)
+                
+        elif isinstance(data, list):
+            # Process each item in the list
+            for i, item in enumerate(data):
+                data[i] = self._truncate_value(item, max_str_length)
+                
+    def _truncate_value(self, value, max_str_length=100):
+        """
+        Truncate a single value if needed or process it recursively if it's a container.
+        
+        Args:
+            value: The value to process
+            max_str_length: Maximum length for string values
             
-        except requests.exceptions.RequestException as e:
-            error_msg = f"Error generating image: {str(e)}"
-            logger.error(error_msg)
-            raise Exception(error_msg)
+        Returns:
+            The processed value
+        """
+        # Handle nested structures recursively
+        if isinstance(value, dict):
+            self._recursively_truncate_data(value, max_str_length)
+            return value
+            
+        elif isinstance(value, list):
+            self._recursively_truncate_data(value, max_str_length)
+            return value
+            
+        # Handle strings - focus on truncating base64 data
+        elif isinstance(value, str):
+            # Check for base64 image data
+            if "data:image" in value and "," in value:
+                # Truncate at the base64 data
+                parts = value.split(",", 1)
+                return f"{parts[0]},<base64_data_truncated>"
+                
+            # Check for URLs that might contain base64 data
+            elif "image_url" in str(value) and len(value) > max_str_length:
+                return value[:max_str_length] + "...<truncated>"
+                
+            # Check for any URL
+            elif value.startswith(("http://", "https://")) and len(value) > max_str_length:
+                return value[:max_str_length] + "...<truncated>"
+                
+            # Truncate any very long string
+            elif len(value) > max_str_length:
+                return value[:max_str_length] + "...<truncated>"
+                
+        # Return unchanged for other types
+        return value
     
     def generate_image_variation(
         self,

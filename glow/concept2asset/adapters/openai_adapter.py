@@ -158,7 +158,8 @@ class OpenAIGPT5ImageMiniAdapter(OpenRouterAdapter):
             # Create a truncated version of the response for logging
             truncated_result = self._truncate_response_for_logging(result)
             logger.info(f"Response: {json.dumps(truncated_result)}")  # Log truncated response
-            logger.debug(f"Full response: {json.dumps(result)}")  # Log the full response for debugging
+            # Use truncated version for debug logging too, but include a note that it's truncated
+            logger.debug(f"Response details (truncated): {json.dumps(truncated_result)}")
             
             # Enhanced logging for GPT-5-image-mini responses
             logger.info("=== ENHANCED RESPONSE LOGGING FOR GPT-5-IMAGE-MINI ===")
@@ -411,7 +412,9 @@ class OpenAIGPT5ImageMiniAdapter(OpenRouterAdapter):
             else:
                 # Log detailed error information
                 logger.error("No image URL found in response")
-                logger.error(f"Full response: {json.dumps(result)}")
+                # Use truncated version for error logging
+                truncated_result = self._truncate_response_for_logging(result)
+                logger.error(f"Response (truncated): {json.dumps(truncated_result)}")
                 
                 # Check if there's an error message in the response
                 if "error" in result:

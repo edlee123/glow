@@ -226,18 +226,102 @@ class ImageAnalysisAdapter:
                 else:
                     error_msg = "No content found in response"
                     logger.error(error_msg)
-                    logger.error(f"Response: {json.dumps(result)}")
+                    # Use truncated version for error logging
+                    truncated_result = self._truncate_response_for_logging(result)
+                    logger.error(f"Response (truncated): {json.dumps(truncated_result)}")
                     raise Exception(error_msg)
             else:
                 error_msg = "No choices found in response"
                 logger.error(error_msg)
-                logger.error(f"Response: {json.dumps(result)}")
+                # Use truncated version for error logging
+                truncated_result = self._truncate_response_for_logging(result)
+                logger.error(f"Response (truncated): {json.dumps(truncated_result)}")
                 raise Exception(error_msg)
                 
         except requests.exceptions.RequestException as e:
             error_msg = f"Error analyzing image: {str(e)}"
             logger.error(error_msg)
             raise Exception(error_msg)
+            
+    def _truncate_response_for_logging(self, response_data):
+        """
+        Create a truncated version of the response for logging purposes.
+        Thoroughly truncates base64 image data and other large content.
+        
+        Args:
+            response_data (dict): The original response data
+            
+        Returns:
+            dict: A truncated copy of the response data
+        """
+        if not isinstance(response_data, dict):
+            return response_data
+            
+        # Create a deep copy to avoid modifying the original
+        import copy
+        truncated = copy.deepcopy(response_data)
+        
+        # Recursively process the response data
+        self._recursively_truncate_data(truncated)
+        
+        return truncated
+        
+    def _recursively_truncate_data(self, data, max_str_length=100):
+        """
+        Recursively process data structure to truncate large strings and base64 content.
+        
+        Args:
+            data: The data structure to process (dict, list, or primitive)
+            max_str_length: Maximum length for string values before truncation
+        """
+        if isinstance(data, dict):
+            for key, value in data.items():
+                # Process each value in the dictionary
+                data[key] = self._truncate_value(value, max_str_length)
+                
+        elif isinstance(data, list):
+            # Process each item in the list
+            for i, item in enumerate(data):
+                data[i] = self._truncate_value(item, max_str_length)
+                
+    def _truncate_value(self, value, max_str_length):
+        """
+        Truncate a single value if needed or process it recursively if it's a container.
+        
+        Args:
+            value: The value to process
+            max_str_length: Maximum length for string values
+            
+        Returns:
+            The processed value
+        """
+        # Handle nested structures recursively
+        if isinstance(value, dict):
+            self._recursively_truncate_data(value, max_str_length)
+            return value
+            
+        elif isinstance(value, list):
+            self._recursively_truncate_data(value, max_str_length)
+            return value
+            
+        # Handle strings - focus on truncating base64 data
+        elif isinstance(value, str):
+            # Check for base64 image data
+            if "data:image" in value and "," in value:
+                # Truncate at the base64 data
+                parts = value.split(",", 1)
+                return f"{parts[0]},<base64_data_truncated>"
+                
+            # Check for URLs that might contain base64 data
+            elif "image_url" in str(value) and len(value) > max_str_length:
+                return value[:max_str_length] + "...<truncated>"
+                
+            # Truncate any very long string
+            elif len(value) > max_str_length:
+                return value[:max_str_length] + "...<truncated>"
+                
+        # Return unchanged for other types
+        return value
     
     def analyze_multiple_images(
         self,
