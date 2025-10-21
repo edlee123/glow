@@ -15,12 +15,12 @@ From product reference:
 
 <img src="https://drive.google.com/uc?export=view&id=1HPEQMLPiyGGyutxz3-L4gFlDSVaSiZRE" width="100" alt="Demon Pop Bottle">
 
-<img src="https://drive.google.com/uc?export=viewid=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="100" alt="Reference image"> 
+<img src="https://drive.google.com/uc?export=view&id=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="100" alt="Reference image"> 
 
 To sample assets:
 
-<img src="https://drive.google.com/uc?export=view&1rfjQ8o-MWnlA8cNRLnsmo6lGRbSxrt1B" width="100" alt="Demon Pop Sample Asset 1">
-<img src="https://drive.google.com/uc?export=view&13EyRnbkgzIkMIimAsbQ2DPDVNHAqQJS6" width="100" alt="Demon Pop Sample Asset 2">
+<img src="https://drive.google.com/uc?export=view&id=1rfjQ8o-MWnlA8cNRLnsmo6lGRbSxrt1B" width="200" alt="Demon Pop Sample Asset 1">
+<img src="https://drive.google.com/uc?export=view&id=13EyRnbkgzIkMIimAsbQ2DPDVNHAqQJS6" width="200" alt="Demon Pop Sample Asset 2">
 
 ### Example 2: D-Pop Golf Collection - Parent-focused Fashion
 
@@ -30,8 +30,8 @@ From product reference to generated campaign asset:
 
 To sample assets:
 
-<img src="https://drive.google.com/uc?export=view&1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="100" alt="Golf Family Campaign 1">
-<img src="https://drive.google.com/uc?export=view&1GQvXkvyKOxPerRpUYLNeCeFW7CQdUtMh" width="100" alt="Golf Family Campaign 2">
+<img src="https://drive.google.com/uc?export=view&id=1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="200" alt="Golf Family Campaign 1">
+<img src="https://drive.google.com/uc?export=view&id=1GQvXkvyKOxPerRpUYLNeCeFW7CQdUtMh" width="200" alt="Golf Family Campaign 2">
 
 ## Prerequisites
 
