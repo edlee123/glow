@@ -132,6 +132,28 @@ set OPENROUTER_API_KEY=your_api_key_here
 $env:OPENROUTER_API_KEY="your_api_key_here"
 ```
 
+You can verify the API key is set correctly by running this example curl command:
+
+```bash
+curl https://openrouter.ai/api/v1/chat/completions \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
+  -d '{
+  "model": "google/gemini-pro-1.5",
+  "messages": [
+    {
+      "role": "user",
+      "content": [
+        {
+          "type": "text",
+          "text": "Hello, world!"
+        }
+      ]
+    }
+  ]
+}'
+```
+
 ## Example Campaigns
 
 Glow includes two example campaigns to help you get started:

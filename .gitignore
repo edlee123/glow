@@ -140,15 +140,25 @@ scratch/**
 project/
 project/**
 # Exclude deeper content in examples directories
-# Ignore everything inside these directories except the directories themselves
+# Ignore everything inside these directories except the directories themselves and README.md files
 examples/dpop_campaign/**/
 examples/dpop_campaign/**/*
 !examples/dpop_campaign/
 !examples/dpop_campaign/*/
 !examples/dpop_campaign/*/*/
+!examples/dpop_campaign/README.md
+!examples/dpop_campaign/*/README.md
+# Still ignore concept JSON files and PNG files
+examples/dpop_campaign/**/*.json
+examples/dpop_campaign/**/*.png
 
 examples/starter_campaign/**/
 examples/starter_campaign/**/*
 !examples/starter_campaign/
 !examples/starter_campaign/*/
 !examples/starter_campaign/*/*/
+!examples/starter_campaign/README.md
+!examples/starter_campaign/*/README.md
+# Still ignore concept JSON files and PNG files
+examples/starter_campaign/**/*.json
+examples/starter_campaign/**/*.png

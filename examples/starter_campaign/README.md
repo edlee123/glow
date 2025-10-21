@@ -10,54 +10,10 @@ This guide explains how to use Glow to generate creative concepts and assets for
 Before you begin, you'll need:
 
 - Python 3.8 or higher
-- Glow installed (see [main project README.md](../../README.md) for installation instructions)
+- Glow installed
 - An OpenRouter API key
 
-## Setting up the OpenRouter API Key
-
-The application uses OpenRouter to access AI models like Google Gemini for image generation. You need to set up an API key:
-
-1. Visit [OpenRouter](https://openrouter.ai/keys) to create an account and obtain an API key
-2. Set the API key as an environment variable:
-
-   **For Bash/Zsh (Linux/Mac):**
-   ```bash
-   export OPENROUTER_API_KEY=your_api_key_here
-   ```
-
-   **For Windows Command Prompt:**
-   ```cmd
-   set OPENROUTER_API_KEY=your_api_key_here
-   ```
-
-   **For Windows PowerShell:**
-   ```powershell
-   $env:OPENROUTER_API_KEY="your_api_key_here"
-   ```
-
-3. To make this permanent, add the export/set command to your shell profile.
-
-You can verify the API key is set correctly by running one of the example curl commands in the terminal:
-
-```bash
-curl https://openrouter.ai/api/v1/chat/completions \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer $OPENROUTER_API_KEY" \
-  -d '{
-  "model": "google/gemini-pro-1.5",
-  "messages": [
-    {
-      "role": "user",
-      "content": [
-        {
-          "type": "text",
-          "text": "Hello, world!"
-        }
-      ]
-    }
-  ]
-}'
-```
+For detailed installation instructions and API key setup (including verification), please refer to the [main project README.md](../../README.md#installation).
 
 ## Step 1: Generating Concepts
 
