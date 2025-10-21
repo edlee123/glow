@@ -11,17 +11,27 @@ The D-Pop campaign demonstrates how Glow can generate creative assets for divers
 
 ### Example 1: Demon Pop - Teen-focused Energy Drink
 
-From product reference to generated campaign asset:
+From product reference:
 
-<img src="https://drive.google.com/uc?export=view&id=1HPEQMLPiyGGyutxz3-L4gFlDSVaSiZRE" width="300" alt="Demon Pop Bottle"> → <img src="https://drive.google.com/uc?export=view&id=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="300" alt="Demon Pop K-pop Campaign">
+<img src="https://drive.google.com/uc?export=view&id=1HPEQMLPiyGGyutxz3-L4gFlDSVaSiZRE" width="100" alt="Demon Pop Bottle">
+
+<img src="https://drive.google.com/uc?export=viewid=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="100" alt="Reference image"> 
+
+To sample assets:
+
+<img src="https://drive.google.com/uc?export=view&1rfjQ8o-MWnlA8cNRLnsmo6lGRbSxrt1B" width="100" alt="Demon Pop Sample Asset 1">
+<img src="https://drive.google.com/uc?export=view&13EyRnbkgzIkMIimAsbQ2DPDVNHAqQJS6" width="100" alt="Demon Pop Sample Asset 2">
 
 ### Example 2: D-Pop Golf Collection - Parent-focused Fashion
 
 From product reference to generated campaign asset:
 
-<img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="300" alt="Beach Shirt"> → <img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="300" alt="Golf Family Campaign">
+<img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="100" alt="Beach Shirt"> → 
 
-https://private-user-images.githubusercontent.com/16417837/503837974-9f5b1c11-3231-4a9f-85a5-d0178f386287.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjEwNzUzMjAsIm5iZiI6MTc2MTA3NTAyMCwicGF0aCI6Ii8xNjQxNzgzNy81MDM4Mzc5NzQtOWY1YjFjMTEtMzIzMS00YTlmLTg1YTUtZDAxNzhmMzg2Mjg3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIxVDE5MzAyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTRjODllNWU0M2VjNjA1MDIxMDI1ODU2Yjk4MTUxNjcwZDA0ZjY5MmFjNjgxYTkwNjFhZmI3YTk2MzM5Yzk0NDYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.K92GUrNyBTMTkRlx70lG1n9rIzS9hZBo3kKDPHrw3gw
+To sample assets:
+
+<img src="https://drive.google.com/uc?export=view&1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="100" alt="Golf Family Campaign 1">
+<img src="https://drive.google.com/uc?export=view&1GQvXkvyKOxPerRpUYLNeCeFW7CQdUtMh" width="100" alt="Golf Family Campaign 2">
 
 ## Prerequisites
 
