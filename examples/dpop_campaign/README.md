@@ -36,8 +36,7 @@ From product reference to generated campaign asset:
 <table>
   <tr>
     <td><img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="200" alt="Beach Shirt"></td>
-    <td>→</td>
-    <td><img src="https://drive.google.com/uc?export=view&id=1PxOuyfsXgHl5mMQfNDjdWfaDdoePmhWk" width="200" alt="Golf Family Campaign 1"></td>
+    <td>
   </tr>
 </table>
 
