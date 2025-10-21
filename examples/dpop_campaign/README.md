@@ -13,13 +13,13 @@ The D-Pop campaign demonstrates how Glow can generate creative assets for divers
 
 From product reference to generated campaign asset:
 
-<img src="https://private-user-images.githubusercontent.com/16417837/503713069-9ce1c200-887c-4051-beb1-041a878861a7.png" width="300" alt="Demon Pop Bottle"> → <img src="https://private-user-images.githubusercontent.com/16417837/503716360-6f80d597-cadd-4948-87bb-0f937458e063.png" width="300" alt="Demon Pop K-pop Campaign">
+<img src="https://drive.google.com/uc?export=view&id=1HPEQMLPiyGGyutxz3-L4gFlDSVaSiZRE" width="300" alt="Demon Pop Bottle"> → <img src="https://drive.google.com/uc?export=view&id=1Vwj46nE9mlVzTwW3YDfX8age8uaezyP6" width="300" alt="Demon Pop K-pop Campaign">
 
 ### Example 2: D-Pop Golf Collection - Parent-focused Fashion
 
 From product reference to generated campaign asset:
 
-<img src="https://github.com/edlee123/glow/assets/1234567/beach_shirt.png" width="300" alt="Beach Shirt"> → <img src="https://github.com/edlee123/glow/assets/1234567/golf_family.png" width="300" alt="Golf Family Campaign">
+<img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="300" alt="Beach Shirt"> → <img src="https://drive.google.com/uc?export=view&id=1vgxnE5O-VNbqX5pX4YuWrZs8iZ0MWep5" width="300" alt="Golf Family Campaign">
 
 https://private-user-images.githubusercontent.com/16417837/503837974-9f5b1c11-3231-4a9f-85a5-d0178f386287.png?jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NjEwNzUzMjAsIm5iZiI6MTc2MTA3NTAyMCwicGF0aCI6Ii8xNjQxNzgzNy81MDM4Mzc5NzQtOWY1YjFjMTEtMzIzMS00YTlmLTg1YTUtZDAxNzhmMzg2Mjg3LnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTEwMjElMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUxMDIxVDE5MzAyMFomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTRjODllNWU0M2VjNjA1MDIxMDI1ODU2Yjk4MTUxNjcwZDA0ZjY5MmFjNjgxYTkwNjFhZmI3YTk2MzM5Yzk0NDYmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.K92GUrNyBTMTkRlx70lG1n9rIzS9hZBo3kKDPHrw3gw
 
