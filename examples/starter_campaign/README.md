@@ -1,4 +1,4 @@
-# @starter_campaign - Campaign Generation Guide
+# starter_campaign - Campaign Generation Guide
 
 This guide explains how to use Glow to generate creative concepts and assets for the @starter_campaign. The process involves two main steps:
 
