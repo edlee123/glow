@@ -3,6 +3,16 @@ Configuration management utilities for the Glow package.
 
 This module provides functions for loading, validating, and accessing configuration settings.
 It handles default configurations, user-specific overrides, and environment-specific settings.
+
+Configuration Hierarchy:
+1. Default configuration (glow/core/default_config.json) - Base settings for all installations
+2. User configuration (~/.glow/config.json) - User-specific overrides that persist across runs
+3. Runtime overrides - Temporary changes made during program execution via set_config_value()
+
+Configuration overrides allow customization at different levels:
+- Default config provides sensible defaults for all users
+- User config allows persistent customization without modifying source code
+- Runtime overrides enable temporary changes for specific sessions or operations
 """
 
 import os
@@ -39,6 +49,23 @@ def load_config() -> Dict[str, Any]:
     """
     Load configuration from default and user-specific files.
     
+    The configuration is loaded in a hierarchical manner:
+    1. Start with an empty configuration
+    2. Load and apply the default configuration from DEFAULT_CONFIG_PATH
+    3. If a user configuration exists at USER_CONFIG_PATH, load and deep merge it
+       with the default configuration, allowing partial overrides
+    
+    When to use configuration overrides:
+    - Use the default configuration for project-wide settings that rarely change
+    - Use user configuration (~/.glow/config.json) for:
+      * API keys and credentials (never store these in the default config)
+      * User preferences (output directories, logging levels, etc.)
+      * Model selection and parameters
+      * Custom feature toggles
+    
+    The deep merge ensures that user configuration can override specific nested
+    values without having to specify the entire configuration structure.
+    
     Returns:
         Dict[str, Any]: The merged configuration dictionary
     """
@@ -64,6 +91,18 @@ def deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> None:
     """
     Recursively merge override dictionary into base dictionary.
     
+    This function performs a deep merge of nested dictionaries, allowing for
+    partial overrides of configuration sections. For example, a user can override
+    just the 'model' in the 'api.openai' section without affecting other settings.
+    
+    The merge behavior is as follows:
+    - If a key exists in both dictionaries and both values are dictionaries,
+      recursively merge those dictionaries
+    - Otherwise, the value from the override dictionary takes precedence
+    
+    This is a key part of the configuration override system, enabling granular
+    customization without duplicating the entire configuration structure.
+    
     Args:
         base (Dict[str, Any]): Base dictionary to be updated
         override (Dict[str, Any]): Dictionary with values to override
@@ -77,6 +116,20 @@ def deep_merge(base: Dict[str, Any], override: Dict[str, Any]) -> None:
 def save_user_config(config: Dict[str, Any]) -> None:
     """
     Save user configuration to the user config file.
+    
+    This function saves the current configuration to the user's configuration file
+    at ~/.glow/config.json. This allows for persistent configuration changes
+    that will be applied across multiple runs of the application.
+    
+    Common use cases for saving user configuration:
+    - Storing API keys and credentials
+    - Saving user preferences (output directories, model choices, etc.)
+    - Setting custom parameters for specific use cases
+    - Enabling or disabling optional features
+    
+    Note: The entire configuration is saved, but when loaded, it will be merged
+    with the default configuration. Consider saving only the sections you want
+    to override rather than the entire configuration.
     
     Args:
         config (Dict[str, Any]): Configuration dictionary to save
@@ -95,6 +148,21 @@ def save_user_config(config: Dict[str, Any]) -> None:
 def get_config_value(key: str, default: Any = None) -> Any:
     """
     Get a specific configuration value by key.
+    
+    This function retrieves a value from the configuration using dot notation
+    for accessing nested values. For example, 'api.openai.model' will access
+    config['api']['openai']['model'].
+    
+    If the key is not found at any level, the provided default value is returned.
+    This allows for graceful handling of missing configuration values and
+    provides sensible defaults for optional settings.
+    
+    Examples:
+        >>> get_config_value('api.openai.model', 'gpt-3.5-turbo')
+        'gpt-4'  # If the value exists in the configuration
+        
+        >>> get_config_value('nonexistent.key', 'default-value')
+        'default-value'  # If the key doesn't exist
     
     Args:
         key (str): The configuration key (can use dot notation for nested keys)
@@ -123,6 +191,28 @@ def get_config_value(key: str, default: Any = None) -> Any:
 def set_config_value(key: str, value: Any, save: bool = True) -> None:
     """
     Set a specific configuration value by key.
+    
+    This function updates a value in the configuration using dot notation
+    for accessing nested values. It automatically creates any necessary
+    intermediate dictionaries if they don't exist.
+    
+    The `save` parameter controls whether the change is:
+    - Persistent: When save=True (default), the change is written to the
+      user configuration file and will persist across application restarts
+    - Temporary: When save=False, the change only affects the current
+      runtime and will be lost when the application restarts
+    
+    Runtime configuration changes are useful for:
+    - Temporary overrides for specific operations
+    - Testing different settings without modifying the saved configuration
+    - Programmatically adjusting settings based on runtime conditions
+    
+    Examples:
+        # Persistent change to the OpenAI model
+        >>> set_config_value('api.openai.model', 'gpt-4-turbo')
+        
+        # Temporary change to output directory
+        >>> set_config_value('output.directory', '/tmp/test_output', save=False)
     
     Args:
         key (str): The configuration key (can use dot notation for nested keys)
@@ -158,6 +248,14 @@ def set_config_value(key: str, value: Any, save: bool = True) -> None:
 def create_default_config() -> None:
     """
     Create a default configuration file if it doesn't exist.
+    
+    This function is typically called during initial setup or when
+    the default configuration file is missing. It creates a minimal
+    configuration with essential settings.
+    
+    Note: This default configuration should NOT include sensitive information
+    like API keys. Those should be added by the user to their user configuration
+    file at ~/.glow/config.json.
     """
     if not os.path.exists(DEFAULT_CONFIG_PATH):
         default_config = {
@@ -167,11 +265,6 @@ def create_default_config() -> None:
                     "temperature": 0.7,
                     "max_tokens": 2000
                 },
-                "firefly": {
-                    "model": "firefly-text-to-image",
-                    "negative_prompt": "blurry, distorted, low quality, unrealistic, text, watermark",
-                    "style_strength": 80
-                }
             },
             "output": {
                 "directory": "output",

@@ -24,22 +24,6 @@
       "position": "bottom"
     }
   },
-  "firefly_generation": {
-    "api_endpoint": "https://firefly-api.adobe.io/v2/images/generate",
-    "env_vars": ["ADOBE_CLIENT_ID", "ADOBE_CLIENT_SECRET"],
-    "model": "firefly-text-to-image",
-    "parameters": {
-      "negative_prompt": "blurry, distorted, low quality, unrealistic, text, watermark",
-      "style_strength": 80
-    },
-    "resolution": {
-      "1_1": [1080, 1080],
-      "9_16": [1080, 1920],
-      "16_9": [1920, 1080]
-    },
-    "formats": ["1_1", "9_16", "16_9"],
-    "quality": 95
-  },
   "localization": {
     "enabled": false,
     "api_endpoint": "https://translation.googleapis.com/language/translate/v2",
