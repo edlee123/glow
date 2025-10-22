@@ -21,6 +21,14 @@ from typing import Optional, List, Dict, Any, Union
 from glow import __version__
 from glow.core.config import get_config, get_config_value
 from glow.core.logging_config import get_logger, configure_logging
+from glow.core.constants import (
+    DEFAULT_LLM_MODEL,
+    DEFAULT_NUM_CONCEPTS,
+    DEFAULT_OUTPUT_FORMAT,
+    DEFAULT_LLM_MAX_RETRIES,
+    DEFAULT_LLM_FAIL_FAST,
+    DEFAULT_LLM_RETRY_BACKOFF_BASE
+)
 
 # Initialize logging
 configure_logging()
@@ -187,22 +195,30 @@ def campaign2concept(campaign_brief_path: str, num_concepts: Optional[int] = Non
         # Process campaign brief for each output format
         processor = CampaignProcessor()
         all_concept_paths = {}
+        successful_concepts = 0
+        failed_concepts = 0
         
         for output_format in processed_formats:
-            click.echo(f"\nGenerating concepts for format: {output_format}")
-            concept_paths = processor.process_campaign(
-                campaign_brief_path=campaign_brief_path,
-                num_concepts=num_concepts,
-                output_format=output_format,
-                output_dir=output_dir,
-                log_file=log_file_path
-            )
-            
-            # Merge the results
-            for product, paths in concept_paths.items():
-                if product not in all_concept_paths:
-                    all_concept_paths[product] = []
-                all_concept_paths[product].extend(paths)
+            click.echo(f"\n{'='*20} FORMAT: {output_format} {'='*20}")
+            try:
+                concept_paths = processor.process_campaign(
+                    campaign_brief_path=campaign_brief_path,
+                    num_concepts=num_concepts,
+                    output_format=output_format,
+                    output_dir=output_dir,
+                    log_file=log_file_path
+                )
+                
+                # Merge the results
+                for product, paths in concept_paths.items():
+                    if product not in all_concept_paths:
+                        all_concept_paths[product] = []
+                    all_concept_paths[product].extend(paths)
+                    successful_concepts += len(paths)
+            except Exception as e:
+                logger.error(f"Error processing format {output_format}: {str(e)}")
+                failed_concepts += 1
+                click.echo(f"Error processing format {output_format}: {str(e)}", err=True)
         
         # Print summary
         click.echo("\nGenerated concepts:")
@@ -253,8 +269,47 @@ def campaign2concept(campaign_brief_path: str, num_concepts: Optional[int] = Non
             concepts_source = "from campaign brief"
         else:
             concepts_source = "per product"
-            
-        click.echo(f"\nTotal: {total_concepts} concept(s) generated ({num_concepts} {concepts_source}) for {len(all_concept_paths)} product(s) {format_summary}")
+        
+        # Print detailed summary
+        click.echo("\n=== GENERATION SUMMARY ===")
+        click.echo(f"Total concepts requested: {num_concepts * len(campaign_brief['products']) * len(processed_formats)}")
+        click.echo(f"Total concepts successfully generated: {successful_concepts}")
+        click.echo(f"Total concepts failed: {failed_concepts}")
+        
+        # Calculate success rate (avoid division by zero)
+        total_attempts = successful_concepts + failed_concepts
+        if total_attempts > 0:
+            success_rate = successful_concepts / total_attempts * 100
+            click.echo(f"Success rate: {success_rate:.1f}%")
+        else:
+            click.echo("Success rate: N/A (no concepts processed)")
+        
+        # Print final summary with highlighting
+        click.echo("\n" + "="*60)
+        click.echo("FINAL SUMMARY")
+        click.echo("="*60)
+        click.echo(f"Total: {total_concepts} concept(s) generated ({num_concepts} {concepts_source})")
+        click.echo(f"Products: {len(all_concept_paths)} product(s)")
+        click.echo(f"Formats: {format_summary}")
+        
+        # Add information about retry mechanism
+        max_retries = get_config_value("llm.max_retries", DEFAULT_LLM_MAX_RETRIES)
+        fail_fast = get_config_value("llm.fail_fast", DEFAULT_LLM_FAIL_FAST)
+        click.echo(f"\nLLM Retry Configuration:")
+        click.echo(f"  Max retry attempts: {max_retries} (will try up to {max_retries} additional times after initial attempt)")
+        click.echo(f"  Fail fast mode: {'Enabled' if fail_fast else 'Disabled'}")
+        
+        if fail_fast:
+            click.echo(f"  Retry behavior: Will attempt {max_retries} retries, then raise an error if all attempts fail")
+        else:
+            click.echo(f"  Retry behavior: Will attempt {max_retries} retries, then use fallback template if all attempts fail")
+        
+        # Print file paths if any were generated
+        if total_concepts > 0:
+            click.echo("\nSuccessfully written files:")
+            for product, paths in all_concept_paths.items():
+                for path in paths:
+                    click.echo(f"  - {path}")
         
     except Exception as e:
         logger.error(f"Error generating concepts: {str(e)}")

@@ -11,6 +11,7 @@ import datetime
 import uuid
 import glob
 import re
+import time
 from typing import Dict, Any, List, Optional, Union
 from pathlib import Path
 
@@ -19,7 +20,7 @@ import jsonschema
 from glow.core.logging_config import get_logger
 from glow.schemas import load_schema
 from glow.campaign2concept.input_validator import InputValidator
-from glow.campaign2concept.llm_templates import generate_concept_prompt, generate_image_prompt, parse_llm_response
+from glow.campaign2concept.llm_templates import generate_concept_prompt, generate_text2image_prompt, parse_llm_response
 from glow.campaign2concept.llm_client import OpenRouterLLMClient
 from glow.campaign2concept.logo_config import get_default_logo_config
 from glow.core.config import get_config_value
@@ -27,7 +28,10 @@ from glow.core.constants import (
     DEFAULT_LLM_MODEL,
     DEFAULT_IMAGE_MODEL,
     DEFAULT_NUM_CONCEPTS,
-    DEFAULT_OUTPUT_FORMAT
+    DEFAULT_OUTPUT_FORMAT,
+    DEFAULT_LLM_MAX_RETRIES,
+    DEFAULT_LLM_FAIL_FAST,
+    DEFAULT_LLM_RETRY_BACKOFF_BASE
 )
 
 # Initialize logger
@@ -94,7 +98,7 @@ class CampaignProcessor:
         result = {}
         for product in campaign_brief["products"]:
             product_name = product["name"]
-            logger.info(f"Generating concepts for product: {product_name}")
+            logger.info(f"{'*'*20} PRODUCT: {product_name} {'*'*20}")
             
             # Create a directory for the product
             product_slug = product_name.lower().replace(" ", "_")
@@ -103,28 +107,46 @@ class CampaignProcessor:
             
             # Generate concepts for this product
             product_concepts = []
+            successful_concepts = 0
+            failed_concepts = 0
+            total_retry_attempts = 0
+            
             for i in range(num_concepts):
                 concept_num = i + 1
-                logger.info(f"Generating concept {concept_num} for {product_name} in {output_format} format")
+                logger.info(f"{'>'*5} Generating concept {concept_num} for {product_name} in {aspect_ratio} format {'<'*5}")
                 
-                # Generate the concept
-                concept = self._generate_concept(campaign_brief, product, concept_num, aspect_ratio, llm_client)
-                
-                # Find the next available concept number to avoid overwriting existing files
-                next_concept_num = self._find_next_concept_number(product_dir, output_format)
-                
-                # Update the concept number in the concept data
-                concept["concept"] = f"concept{next_concept_num}"
-                
-                # Save the concept configuration with a descriptive name
-                concept_filename = f"concept{next_concept_num}_{output_format}.json"
-                concept_path = os.path.join(product_dir, concept_filename)
-                self.save_concept_config(concept, concept_path)
-                
-                logger.info(f"Saved as concept {next_concept_num} to avoid overwriting existing files")
-                
-                product_concepts.append(concept_path)
-                logger.info(f"Generated and saved concept {concept_num} for {product_name}")
+                try:
+                    # Generate the concept
+                    concept = self._generate_concept(campaign_brief, product, concept_num, aspect_ratio, llm_client)
+                    
+                    # Find the next available concept number to avoid overwriting existing files
+                    next_concept_num = self._find_next_concept_number(product_dir, output_format)
+                    
+                    # Update the concept number in the concept data
+                    concept["concept"] = f"concept{next_concept_num}"
+                    
+                    # Save the concept configuration with a descriptive name
+                    concept_filename = f"concept{next_concept_num}_{output_format}.json"
+                    concept_path = os.path.join(product_dir, concept_filename)
+                    self.save_concept_config(concept, concept_path)
+                    
+                    logger.info(f"Saved as concept {next_concept_num} to avoid overwriting existing files")
+                    
+                    product_concepts.append(concept_path)
+                    logger.info(f"Generated and saved concept {concept_num} for {product_name}")
+                    successful_concepts += 1
+                    
+                    # Add retry attempts to total if available
+                    if hasattr(concept, 'retry_attempts'):
+                        total_retry_attempts += concept.get('retry_attempts', 0)
+                        logger.info(f"Concept required {concept.get('retry_attempts', 0)} retry attempts")
+                except Exception as e:
+                    logger.error(f"Failed to generate concept {concept_num} for {product_name}: {str(e)}")
+                    failed_concepts += 1
+                    continue
+            
+            # Log summary for this product
+            logger.info(f"Product '{product_name}' summary: {successful_concepts} concepts generated successfully, {failed_concepts} failed, {total_retry_attempts} retry attempts")
             
             result[product_name] = product_concepts
         
@@ -262,7 +284,10 @@ class CampaignProcessor:
         product: Dict[str, Any],
         concept_num: int,
         aspect_ratio: str,
-        llm_client: OpenRouterLLMClient
+        llm_client: OpenRouterLLMClient,
+        max_retries: Optional[int] = None,
+        fail_fast: Optional[bool] = None,
+        retry_backoff_base: Optional[int] = None
     ) -> Dict[str, Any]:
         """
         Generate a single concept configuration.
@@ -301,28 +326,90 @@ class CampaignProcessor:
         # Generate LLM prompts
         prompts = generate_concept_prompt(campaign_brief, product, concept_num, aspect_ratio)
         
-        # Call the LLM to generate the concept
-        logger.info(f"Calling LLM to generate concept {concept_num} for {product_name}")
-        try:
-            llm_response = llm_client.generate_concept(
-                system_prompt=prompts["system_prompt"],
-                user_prompt=prompts["user_prompt"]
-            )
-            logger.info(f"LLM response received for concept {concept_num}")
-            logger.debug(f"LLM response: {json.dumps(llm_response)}")
-            
-            # Parse the LLM response
-            if isinstance(llm_response, dict) and "raw_content" in llm_response:
-                # If we got raw content, try to parse it
-                parsed_response = parse_llm_response(llm_response["raw_content"])
-            else:
-                # If we already have a structured response, use it
-                parsed_response = llm_response
+        # Get configuration values with defaults
+        max_retries = max_retries if max_retries is not None else get_config_value("llm.max_retries", DEFAULT_LLM_MAX_RETRIES)
+        fail_fast = fail_fast if fail_fast is not None else get_config_value("llm.fail_fast", DEFAULT_LLM_FAIL_FAST)
+        retry_backoff_base = retry_backoff_base if retry_backoff_base is not None else get_config_value("llm.retry_backoff_base", DEFAULT_LLM_RETRY_BACKOFF_BASE)
+        
+        # Call the LLM to generate the concept with retry mechanism
+        # max_retries is the number of additional attempts after the initial attempt
+        # If fail_fast is True, we'll raise an error after all retries fail
+        # If fail_fast is False, we'll use a template-based fallback after all retries fail
+        logger.info(f"Generating concept {concept_num} for {product_name} with max_retries={max_retries}, fail_fast={fail_fast}")
+        
+        retry_count = 0
+        last_error = None
+        
+        while retry_count <= max_retries:  # <= to include the initial attempt
+            try:
+                # If this is a retry, add information about the previous failure to the prompt
+                current_prompts = prompts.copy()
+                if retry_count > 0 and last_error:
+                    logger.info(f"Retry attempt {retry_count}/{max_retries} for concept {concept_num}")
+                    # Add information about the previous failure to help the LLM
+                    current_prompts["user_prompt"] += f"\n\nPrevious attempt failed with error: {last_error}\n"
+                    current_prompts["user_prompt"] += "Please ensure your response is a valid JSON array with the required fields."
                 
-            logger.info(f"Parsed LLM response for concept {concept_num}")
-        except Exception as e:
-            logger.error(f"Error generating concept with LLM: {str(e)}")
-            logger.warning("Falling back to template-based concept generation")
+                # Call the LLM
+                llm_response = llm_client.generate_concept(
+                    system_prompt=current_prompts["system_prompt"],
+                    user_prompt=current_prompts["user_prompt"]
+                )
+                logger.info(f"LLM response received for concept {concept_num}")
+                logger.debug(f"LLM response: {json.dumps(llm_response)}")
+                
+                # Parse the LLM response
+                if isinstance(llm_response, dict) and "raw_content" in llm_response:
+                    # If we got raw content, try to parse it
+                    parsed_response = parse_llm_response(llm_response["raw_content"])
+                else:
+                    # If we already have a structured response, use it
+                    parsed_response = llm_response
+                
+                # If the response is an array, extract the first item
+                if isinstance(parsed_response, list) and len(parsed_response) > 0:
+                    logger.info("Response is an array, extracting first concept")
+                    parsed_response = parsed_response[0]
+                    
+                # Validate the parsed response
+                if self._validate_concept_response(parsed_response):
+                    logger.info(f"Successfully parsed and validated LLM response for concept {concept_num}")
+                    # Store the validated response for later use
+                    self.validated_response = parsed_response
+                    break  # Success! Exit the retry loop
+                else:
+                    raise ValueError("Parsed response is missing required fields")
+                    
+            except Exception as e:
+                last_error = str(e)
+                logger.warning(f"Attempt {retry_count + 1}/{max_retries + 1} failed: {last_error}")
+                
+                # If we've reached the maximum number of retries
+                if retry_count >= max_retries:
+                    if fail_fast:
+                        logger.error(f"All {max_retries + 1} attempts failed and fail_fast=True. Raising error.")
+                        raise ValueError(f"Failed to generate concept after {max_retries + 1} attempts: {last_error}")
+                    else:
+                        logger.error(f"All {max_retries + 1} attempts failed. Falling back to template-based generation.")
+                        # Fall back to template-based generation
+                        break
+                
+                # Exponential backoff before retrying
+                wait_time = retry_backoff_base ** retry_count
+                logger.info(f"Retrying in {wait_time} seconds...")
+                time.sleep(wait_time)
+                
+                retry_count += 1
+                
+                # Track the number of retries for reporting
+                if not hasattr(self, 'retry_attempts'):
+                    self.retry_attempts = 0
+                self.retry_attempts += 1
+        
+        # If we've exhausted all retries and still failed, use template-based generation
+        parsed_response = None
+        if retry_count > max_retries:
+            logger.warning("Using template-based concept generation as fallback")
             
             # Extract information for image prompt
             from glow.campaign2concept.llm_templates import extract_product_specific_style
@@ -408,8 +495,8 @@ class CampaignProcessor:
                     if tagline:
                         additional_instructions += f"Consider the seasonal tagline: '{tagline}'. "
             
-            # Generate image prompt
-            image_prompt = generate_image_prompt(
+            # Generate text-to-image prompt
+            text2image_prompt = generate_text2image_prompt(
                 product_name=product_name,
                 visual_style=visual_style,
                 visual_mood=visual_mood,
@@ -427,7 +514,7 @@ class CampaignProcessor:
             # Create a fallback parsed response
             parsed_response = {
                 "creative_direction": f"Concept {concept_num}: {visual_style} imagery showcasing {product_name} with a {visual_mood} mood",
-                "text2image_prompt": image_prompt,
+                "text2image_prompt": text2image_prompt,
                 "text_overlay_config": {
                     "primary_text": campaign_brief["campaign_message"]["primary"],
                     "text_position": "bottom",
@@ -439,6 +526,114 @@ class CampaignProcessor:
             }
         
         # Create the concept configuration
+        concept = self._create_concept_config(
+            parsed_response,
+            generation_id,
+            campaign_brief,
+            product,
+            product_name,
+            concept_num,
+            aspect_ratio
+        )
+        
+        return concept
+    
+    def _validate_concept_response(self, response: Dict[str, Any]) -> bool:
+        """
+        Validate that a concept response has all required fields.
+        
+        This validation is strict and will fail if any required field is missing or empty.
+        No fallback values will be used - the LLM must provide all required fields.
+        
+        Args:
+            response (Dict[str, Any]): The parsed LLM response
+            
+        Returns:
+            bool: True if the response is valid, False otherwise
+        """
+        # Check required top-level fields
+        required_fields = ["creative_direction", "text2image_prompt", "text_overlay_config"]
+        for field in required_fields:
+            if field not in response:
+                logger.warning(f"Missing required field: {field}")
+                return False
+            # Check that the field is not empty
+            if not response[field]:
+                logger.warning(f"Required field is empty: {field}")
+                return False
+                
+        # Check text_overlay_config has required fields
+        if "text_overlay_config" in response:
+            text_config = response["text_overlay_config"]
+            required_text_fields = ["primary_text", "text_position", "font", "color"]
+            for field in required_text_fields:
+                if field not in text_config:
+                    logger.warning(f"Missing required field in text_overlay_config: {field}")
+                    return False
+                # Check that the field is not empty
+                if not text_config[field]:
+                    logger.warning(f"Required field in text_overlay_config is empty: {field}")
+                    return False
+                    
+        # Validate text_position is one of the allowed values
+        allowed_positions = ["top", "bottom", "center", "top_left", "top_right", "bottom_left", "bottom_right"]
+        if response["text_overlay_config"]["text_position"] not in allowed_positions:
+            logger.warning(f"Invalid text_position: {response['text_overlay_config']['text_position']}")
+            return False
+            
+        # Validate font is one of the allowed values
+        allowed_fonts = ["Montserrat-Regular", "Montserrat Bold", "OpenSans-Regular",
+                         "Roboto-Regular", "PlayfairDisplay-Regular", "Anton-Regular",
+                         "DancingScript-Regular", "RobotoMono-Regular"]
+        if response["text_overlay_config"]["font"] not in allowed_fonts:
+            logger.warning(f"Invalid font: {response['text_overlay_config']['font']}")
+            return False
+            
+        # Validate color is a valid hex code
+        import re
+        if not re.match(r'^#([A-Fa-f0-9]{6})$', response["text_overlay_config"]["color"]):
+            logger.warning(f"Invalid color format: {response['text_overlay_config']['color']}")
+            return False
+            
+        return True
+    
+    def _create_concept_config(
+        self,
+        parsed_response: Optional[Dict[str, Any]],
+        generation_id: str,
+        campaign_brief: Dict[str, Any],
+        product: Dict[str, Any],
+        product_name: str,
+        concept_num: int,
+        aspect_ratio: str
+    ) -> Dict[str, Any]:
+        """
+        Create a concept configuration from the parsed LLM response or fallback values.
+        
+        Args:
+            parsed_response (Dict[str, Any], optional): The parsed LLM response, or None if using fallback
+            generation_id (str): The unique generation ID
+            campaign_brief (Dict[str, Any]): The campaign brief
+            product (Dict[str, Any]): The product information
+            product_name (str): The product name
+            concept_num (int): The concept number
+            aspect_ratio (str): The aspect ratio
+            
+        Returns:
+            Dict[str, Any]: The concept configuration
+        """
+        # Use the validated response from the LLM call if available
+        if hasattr(self, 'validated_response') and self.validated_response is not None:
+            parsed_response = self.validated_response
+            # Clear it for the next call
+            self.validated_response = None
+        # If parsed_response is still None, provide more detailed error information
+        elif parsed_response is None:
+            error_msg = "No valid LLM response received. Cannot generate concept without LLM-generated content."
+            logger.error(error_msg)
+            raise ValueError(error_msg)
+        
+        # Create the concept configuration
         concept = {
             "generation_id": generation_id,
             "timestamp": datetime.datetime.now().isoformat(),
@@ -446,18 +641,13 @@ class CampaignProcessor:
             "product": product_name,
             "aspect_ratio": aspect_ratio,
             "concept": f"concept{concept_num}",
+            "retry_attempts": getattr(self, 'retry_attempts', 0),  # Include retry attempts in metadata
             "generated_concept": {
                 "model": get_config_value("generated_concept.model", DEFAULT_LLM_MODEL),
-                "creative_direction": parsed_response.get("creative_direction", f"Concept {concept_num} for {product_name}"),
-                "text2image_prompt": parsed_response.get("text2image_prompt", parsed_response.get("image_prompt", "")),
-                "text_overlay_config": parsed_response.get("text_overlay_config", {
-                    "primary_text": campaign_brief["campaign_message"]["primary"],
-                    "text_position": "bottom",
-                    "font": "Montserrat Bold",
-                    "color": "#FFFFFF",
-                    "shadow": True,
-                    "shadow_color": "#00000080"
-                })
+                # Use LLM-generated content directly without fallback
+                "creative_direction": parsed_response["creative_direction"],
+                "text2image_prompt": parsed_response["text2image_prompt"],
+                "text_overlay_config": parsed_response["text_overlay_config"]
             },
             "image_generation": {
                 "provider": get_config_value("image_generation.provider", "openrouter_gemini"),
@@ -493,9 +683,9 @@ class CampaignProcessor:
                 }
             }
         
-        # Log the prompts used (in a real implementation, these would be sent to an LLM)
-        logger.debug(f"System prompt: {prompts['system_prompt']}")
-        logger.debug(f"User prompt: {prompts['user_prompt']}")
+        # Remove references to undefined 'prompts' variable
+        # logger.debug(f"System prompt: {prompts['system_prompt']}")
+        # logger.debug(f"User prompt: {prompts['user_prompt']}")
         
         return concept
     

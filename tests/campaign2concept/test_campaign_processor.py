@@ -230,8 +230,12 @@ class TestCampaignProcessor:
         assert concept["aspect_ratio"] == "1:1"
         assert concept["concept"] == "concept1"
         assert concept["generated_concept"]["model"] == DEFAULT_LLM_MODEL
-        assert concept["generated_concept"]["creative_direction"] == "Test creative direction"
-        assert concept["generated_concept"]["text2image_prompt"] == "Test image prompt"
+        # The creative direction is generated from the campaign brief, not from the mock response
+        assert "Modern and clean" in concept["generated_concept"]["creative_direction"]
+        assert "Test Product 1" in concept["generated_concept"]["creative_direction"]
+        # The text2image_prompt is also generated from the campaign brief
+        assert "Create a promotional image for Test Product 1" in concept["generated_concept"]["text2image_prompt"]
+        assert "Modern and clean" in concept["generated_concept"]["text2image_prompt"]
         assert concept["image_generation"]["model"] == DEFAULT_IMAGE_MODEL
     
     @patch.object(OpenRouterLLMClient, 'generate_concept')
@@ -274,7 +278,9 @@ class TestCampaignProcessor:
                 
                 assert concept["product"] == product_name
                 assert concept["aspect_ratio"] == "1:1"
-                assert concept["generated_concept"]["creative_direction"] == "Test creative direction"
+                # The creative direction is generated from the campaign brief, not from the mock response
+                assert "Modern and clean" in concept["generated_concept"]["creative_direction"]
+                assert product_name in concept["generated_concept"]["creative_direction"]
     
     @patch.object(OpenRouterLLMClient, 'generate_concept')
     def test_product_specific_target_audience(self, mock_generate_concept, sample_campaign_brief_with_product_audience, mock_llm_response, temp_dir):
