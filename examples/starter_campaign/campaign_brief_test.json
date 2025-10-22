@@ -45,7 +45,7 @@
     "mood": "Balanced, energetic yet calm"
   },
   "brand_guidelines": {
-    "logo_placement": "Bottom right corner, at least 50px from edges",
+    "logo_placement": "Top right corner, at least 50px from edges",
     "typography": {
       "primary_font": "Montserrat",
       "secondary_font": "Open Sans"
