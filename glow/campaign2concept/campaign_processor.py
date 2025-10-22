@@ -513,7 +513,7 @@ class CampaignProcessor:
             
             # Create a fallback parsed response
             parsed_response = {
-                "creative_direction": f"Concept {concept_num}: {visual_style} imagery showcasing {product_name} with a {visual_mood} mood",
+                "creative_direction": f"Concept {concept_num}: {visual_style} imagery prominently featuring {product_name} as the main focal point with a {visual_mood} mood",
                 "text2image_prompt": text2image_prompt,
                 "text_overlay_config": {
                     "primary_text": campaign_brief["campaign_message"]["primary"],

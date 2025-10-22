@@ -186,8 +186,16 @@ For each concept, you should provide:
 2. A detailed image prompt for text-to-image generation
 3. Text overlay configuration including positioning, font, and color recommendations
 
+CRITICAL REQUIREMENT: In every concept you create, the product MUST be prominently featured as the main focal point.
+The product should:
+- Be clearly visible and identifiable
+- Take up at least 30% of the image area
+- Be positioned in the foreground or central area
+- Stand out visually through size, positioning, lighting, or color contrast
+
 Your concepts should be visually striking, on-brand, and effectively communicate the campaign message
-to the target audience. Each concept should be distinct and offer a different creative approach.
+to the target audience. Each concept should be distinct and offer a different creative approach, but
+always maintain the product as the hero of the image.
 
 IMPORTANT: For font selection, please ONLY use one of the following available fonts:
 - Montserrat-Regular (sans-serif)
@@ -245,7 +253,7 @@ Please generate {num_concepts} distinct creative concepts for this campaign in {
 For each concept, provide:
 
 1. Creative Direction: A brief description of the concept
-2. Image Prompt: A detailed prompt for text-to-image generation using text-to-image model (later will support Firefly).
+2. Image Prompt: A detailed prompt for text-to-image generation using text-to-image model (later will support Firefly). Your prompt must ensure the product is prominently featured as the main focal point, taking up at least 30% of the image area and positioned in the foreground or central area.
 3. Text Overlay Configuration:
    - Primary Text: Create a unique, compelling text to overlay on the image. You can use the campaign message as inspiration, but feel free to craft a message that best fits your specific concept and the product.
    - Text Position: Where to place the text (top, bottom, center, etc.). Choose a position that works best with your specific concept.
@@ -261,8 +269,12 @@ For each concept, provide:
    - Shadow: Decide if text shadow would enhance readability against your background.
    - Shadow Color: If using shadow, select an appropriate shadow color and opacity.
 
-IMPORTANT: Your response MUST be a valid JSON array of concept objects that strictly follows the schema provided.
-Do not include any explanatory text before or after the JSON array.
+IMPORTANT:
+- Your response MUST be a valid JSON array of concept objects that strictly follows the schema provided.
+- Every image prompt MUST ensure the product is prominently featured, clearly visible, and the main focal point of the image.
+- Avoid concepts where the product is small, obscured, blending into the background, or secondary to other elements.
+- Do not include any explanatory text before or after the JSON array.
+
 Format your response as a JSON array of concepts like this:
 
 [
@@ -303,13 +315,33 @@ Create a promotional image for {product_name} with the following specifications:
 - Aspect Ratio: {aspect_ratio}
 
 The image should:
-- Feature {product_name} as the focal point
+- Feature {product_name} prominently as the main focal point of the composition
+- Ensure the product is clearly visible and identifiable
+- Position the product in the foreground or central area of the image
+- Make the product take up at least 30% of the image area
+- Use lighting and composition techniques to draw attention to the product
 - Evoke emotions of {target_emotions}
 - Address pain points like {pain_points}
 - Have space for text overlay at the {text_position}
 - Be high quality
 - Not include any text in the image itself
 - Focus ONLY on {product_name} and not include elements from other products
+
+While creating a unique and creative concept, ensure that {product_name} remains the hero of the image.
+The product should be integrated naturally into the scene but must stand out visually through size,
+positioning, lighting, or color contrast.
+
+Avoid concepts where the product is:
+- Small or difficult to identify
+- Obscured by other elements
+- Blending into the background
+- Secondary to other visual elements
+- Only partially visible
+
+If reference images are provided, maintain the product's visual identity and prominence while adapting
+it to the creative concept.
+
+Before finalizing the concept, verify that {product_name} is immediately recognizable as the main subject of the image.
 
 {additional_instructions}
 
