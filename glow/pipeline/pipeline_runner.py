@@ -303,18 +303,11 @@ class PipelineRunner:
         concept_key = "generated_concept" if "generated_concept" in concept_config else "llm_processing"
         
         # Check for required concept keys
-        required_concept_keys = ["creative_direction", "text_overlay_config"]
-        # Add either text2image_prompt or image_prompt to required keys
-        if "text2image_prompt" not in concept_config[concept_key] and "image_prompt" not in concept_config[concept_key]:
-            required_concept_keys.append("text2image_prompt")  # Add this to show in error message
+        required_concept_keys = ["creative_direction", "text_overlay_config", "text2image_prompt"]
         
         missing_concept_keys = []
         for key in required_concept_keys:
-            # Special handling for text2image_prompt/image_prompt
-            if key == "text2image_prompt":
-                if "text2image_prompt" not in concept_config[concept_key] and "image_prompt" not in concept_config[concept_key]:
-                    missing_concept_keys.append("text2image_prompt or image_prompt")
-            elif key not in concept_config[concept_key]:
+            if key not in concept_config[concept_key]:
                 missing_concept_keys.append(key)
         
         if missing_concept_keys:
@@ -386,17 +379,11 @@ class PipelineRunner:
         concept_key = "generated_concept" if "generated_concept" in concept_config else "llm_processing"
         generated_concept = concept_config[concept_key]
         
-        # Use text2image_prompt, but fall back to firefly_prompt or image_prompt for backward compatibility
+        # Use text2image_prompt
         if "text2image_prompt" in generated_concept:
             prompt = generated_concept["text2image_prompt"]
-        elif "firefly_prompt" in generated_concept:
-            prompt = generated_concept["firefly_prompt"]
-            logger.warning("Using firefly_prompt instead of text2image_prompt (deprecated)")
-        elif "image_prompt" in generated_concept:
-            prompt = generated_concept["image_prompt"]
-            logger.warning("Using image_prompt instead of text2image_prompt (deprecated)")
         else:
-            raise ValueError(f"No text2image_prompt, firefly_prompt, or image_prompt found in {concept_key}")
+            raise ValueError(f"No text2image_prompt found in {concept_key}")
         
         # Generate the asset(s)
         asset_paths = self.asset_generator.generate_asset(

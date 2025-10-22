@@ -24,7 +24,7 @@ SAMPLE_CONCEPT = {
     "llm_processing": {
         "model": "gpt-4",
         "creative_direction": "Test creative direction",
-        "image_prompt": "A test image prompt",
+        "text2image_prompt": "A test image prompt",
         "text_overlay_config": {
             "primary_text": "Test text",
             "text_position": "bottom",
@@ -120,7 +120,7 @@ class TestAssetGenerator:
         args, kwargs = self.mock_adapter.generate_image.call_args
         
         # Check prompt
-        assert args[0] == SAMPLE_CONCEPT["llm_processing"]["image_prompt"]
+        assert args[0] == SAMPLE_CONCEPT["llm_processing"]["text2image_prompt"]
         
         # Check dimensions (1:1 aspect ratio should be 1024x1024)
         assert args[1] == 1024
@@ -170,7 +170,7 @@ class TestAssetGenerator:
         invalid_concept["llm_processing"] = {"model": "gpt-4"}
         with pytest.raises(ValueError) as e:
             self.generator.generate_asset(invalid_concept)
-        assert "No text2image_prompt, image_prompt, or firefly_prompt" in str(e.value)
+        assert "No text2image_prompt in" in str(e.value)
         
         # Test missing aspect_ratio
         invalid_concept = SAMPLE_CONCEPT.copy()

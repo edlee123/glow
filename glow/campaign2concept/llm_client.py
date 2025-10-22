@@ -197,17 +197,33 @@ class OpenRouterLLMClient:
                         
                         # Try to parse the content as JSON
                         try:
-                            parsed_content = json.loads(content)
+                            # Clean up any code block markers
+                            import re
+                            cleaned_content = content
+                            # Remove ```json at the beginning
+                            cleaned_content = re.sub(r'^```json\s*', '', cleaned_content)
+                            # Remove ``` at the end
+                            cleaned_content = re.sub(r'\s*```$', '', cleaned_content)
+                            
+                            parsed_content = json.loads(cleaned_content)
                             logger.info("Successfully parsed content as JSON")
                             return parsed_content
-                        except json.JSONDecodeError:
-                            logger.warning("Content is not valid JSON, returning as string")
-                            return {"raw_content": content}
+                        except json.JSONDecodeError as e:
+                            logger.warning(f"Content is not valid JSON: {str(e)}")
+                            logger.debug(f"Invalid JSON content: {cleaned_content[:200]}...")
+                            # Return both the error and the raw content for better debugging
+                            return {
+                                "raw_content": content,
+                                "error": f"JSON parse error: {str(e)}",
+                                "parse_status": "failed"
+                            }
             
             # If we get here, something went wrong
             error_msg = "No valid content in response"
             logger.error(error_msg)
-            raise Exception(error_msg)
+            # Include the full response for debugging
+            logger.debug(f"Full response: {json.dumps(result)}")
+            raise Exception(f"{error_msg}. Check logs for full response details.")
             
         except requests.exceptions.RequestException as e:
             error_msg = f"Error generating concept: {str(e)}"

@@ -77,17 +77,11 @@ class AssetGenerator:
             logger.error(error_msg)
             raise ValueError(error_msg)
             
-        # Check for text2image_prompt first, then fall back to other prompt fields for backward compatibility
+        # Get the text2image_prompt
         if "text2image_prompt" in concept_section:
             prompt = concept_section["text2image_prompt"]
-        elif "image_prompt" in concept_section:
-            prompt = concept_section["image_prompt"]
-            logger.warning(f"Using image_prompt instead of text2image_prompt in {section_name} (deprecated)")
-        elif "firefly_prompt" in concept_section:
-            prompt = concept_section["firefly_prompt"]
-            logger.warning(f"Using firefly_prompt instead of text2image_prompt in {section_name} (deprecated)")
         else:
-            error_msg = f"No text2image_prompt, image_prompt, or firefly_prompt in {section_name} section"
+            error_msg = f"No text2image_prompt in {section_name} section"
             logger.error(error_msg)
             raise ValueError(error_msg)
         

@@ -34,7 +34,7 @@ def test_imports():
     # Test imports from campaign2concept
     from glow.campaign2concept import (
         generate_concept_prompt,
-        generate_image_prompt,
+        generate_text2image_prompt,
         parse_llm_response
     )
 

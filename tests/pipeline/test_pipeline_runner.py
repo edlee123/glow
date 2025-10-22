@@ -76,7 +76,7 @@ class TestPipelineRunner:
             "llm_processing": {
                 "model": "gpt-4",
                 "creative_direction": "Test creative direction",
-                "image_prompt": "Test prompt",
+                "text2image_prompt": "Test prompt",
                 "text_overlay_config": {
                     "primary_text": "Test primary text",
                     "text_position": "bottom",
