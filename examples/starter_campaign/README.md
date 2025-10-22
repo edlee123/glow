@@ -5,6 +5,30 @@ This guide explains how to use Glow to generate creative concepts and assets for
 1. Generating concepts from the campaign brief
 2. Generating assets from the concepts
 
+## Motivating Examples
+
+The starter campaign demonstrates how Glow can generate creative assets for different products with distinct brand identities and target audiences.
+
+### Example 1: Energy Drink X - Dynamic and Energetic
+
+Sample generated asset:
+
+<table>
+  <tr>
+    <td><img src="https://drive.google.com/uc?export=view&id=1UBNPcJiPY8xa3a6Ht2JUZ6C_KJ49F0FF" width="300" alt="Energy Drink X Sample Asset"></td>
+  </tr>
+</table>
+
+### Example 2: Relaxation Tea - Calm and Soothing
+
+Sample generated asset:
+
+<table>
+  <tr>
+    <td><img src="https://drive.google.com/uc?export=view&id=19lWHIKSyhcXNG_ztzCa1T6YyXrXgfo_C" width="300" alt="Relaxation Tea Sample Asset"></td>
+  </tr>
+</table>
+
 ## Prerequisites
 
 Before you begin, you'll need:
