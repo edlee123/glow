@@ -24,6 +24,12 @@
       "position": "bottom"
     }
   },
+  "llm": {
+    "max_retries": 3,
+    "fail_fast": true,
+    "retry_backoff_base": 2,
+    "comment": "Set fail_fast to true during development to fail immediately on errors, false in production to use fallback"
+  },
   "localization": {
     "enabled": false,
     "api_endpoint": "https://translation.googleapis.com/language/translate/v2",
