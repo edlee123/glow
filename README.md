@@ -1,6 +1,6 @@
-![Glow Logo]()
+![Glow Logo](https://drive.google.com/uc?export=view&id=1HqD58JGlE6sl81aAyXX0mC6CtwuBCvRk)
 
-# Glow - AI to Scale Your Social Media Campaigns
+# Glow AI -  Scale Your Social Media Campaigns
 
 Glow up your social campaigns!  Creating high-quality, brand-compliant assets for every product, in every format, for every market is a massive undertaking. Marketing teams struggle with maintaining brand consistency across hundreds of products, concepts, assets, formats, and meanwhile adapt campaigns for different markets and languages. It's no small feet to meet tight deadlines with limited creative resources, while ensuring legal compliance in the fast moving world of social media.
 
