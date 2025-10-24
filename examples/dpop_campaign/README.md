@@ -1,6 +1,6 @@
 # D-Pop Campaign - Generation Guide
 
-This guide explains how to use Glow to generate creative concepts and assets for the D-Pop campaign. The process involves three main steps:
+This guide explains how to use Glow to generate creative concepts and assets for a hypothetic D-Pop campaign. The process involves the main steps:
 
 1. Generating concepts from the campaign brief
 2. Generating assets from the concepts
@@ -140,7 +140,7 @@ examples/dpop_campaign/
     └── concept2_9_16.json
 ```
 
-## Step 2: Generating Assets
+## Step 3: Generating Assets
 
 Once you have generated concept configurations, you can use them to generate visual assets.
 
